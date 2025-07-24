@@ -6,6 +6,7 @@ class generator;
     transaction pkt;
     virtual port_if vif;
     int current_address;
+    bit active;
 
     // Constructor
     function new(mailbox gen2drv);
@@ -15,6 +16,8 @@ class generator;
 
     
     virtual task run();
+        if(!active) return;
+
         no_transactions = TestRegistry::get_int("NoOfTransactions", 100);
         current_address = 0;  
         $display("[%0t] GEN: Starting test with %0d transactions", $time, no_transactions);

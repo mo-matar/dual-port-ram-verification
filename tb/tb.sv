@@ -16,7 +16,14 @@ module tb_dual_port_ram;
     .clk_b(port_b_if.clk),
     .addr_b(port_b_if.addr),
     .data_b(port_b_if.data),
-    .we_b(port_b_if.we)
+    .we_b(port_b_if.we),
+    .q_a(port_a_if.q),
+    .q_b(port_b_if.q)
+
+    .valid_a(port_a_if.valid),
+    .valid_b(port_b_if.valid),
+    .ready_a(port_a_if.ready),
+    .ready_b(port_b_if.ready)
   );
   
   port_agent agent_a;
