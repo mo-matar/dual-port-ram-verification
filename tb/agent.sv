@@ -1,4 +1,3 @@
-
 class agent;
     generator gen;
     driver drv;
@@ -6,15 +5,14 @@ class agent;
     virtual port_if vif;
 
     function new();
-        gen = new();
+        gen = new(); 
         drv = new();
         mon = new();
     endfunction
-
-    // function build(mailbox gen2drv, mailbox mon2scb);
-    //     gen.gen2drv = gen2drv;
-    //     drv.gen2drv = gen2drv;
-    //     mon.mon2scb = mon2scb;
+    
+    // function void set_generator(generator g);
+    //     gen = g;
+    //     gen.set_mailbox(drv.gen2drv);
     // endfunction
 
     task run();
@@ -23,5 +21,7 @@ class agent;
             drv.run();
             mon.run();
         join_none
+    endtask
+endclass
     endtask
 endclass
