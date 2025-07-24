@@ -1,28 +1,21 @@
-class generator;
+class basic_read_write_single_port extends generator;
 
-    mailbox gen2drv;
-    event gen_done;
-    int no_transactions;
-    transaction pkt;
-    virtual port_if vif;
     int current_address;
 
     // Constructor
     function new(mailbox gen2drv);
-        this.gen2drv = gen2drv;
+        super.new(gen2drv);
+        burst_n_size = 8;  
     endfunction
 
-
-    
+    // Override the default run task 
     virtual task run();
         no_transactions = TestRegistry::get_int("NoOfTransactions", 100);
         current_address = 0;  
-        $display("[%0t] GEN: Starting test with %0d transactions", $time, no_transactions);
+        $display("[%0t] basic_read_write_single_port GEN: Starting test with %0d transactions", $time, no_transactions);
 
         repeat(no_transactions) begin
-            write_transaction();
-            read_transaction();
-            // configure_transaction(pkt);
+            configure_transaction(pkt);
         end
     endtask
 
@@ -32,12 +25,12 @@ class generator;
         if (!pkt.randomize() with {
             pkt.we == 1'b1;  // Force write operations
         }) begin
-            $error("[%0t] GEN: Failed to randomize transaction", $time);
+            $error("[%0t] basic_read_write_single_port GEN: Failed to randomize transaction", $time);
         end
         
         current_address = pkt.addr;
         gen2drv.put(pkt);
-        $display("[%0t] GEN: Generated write transaction at address %0h", $time, current_address);
+        $display("[%0t] basic_read_write_single_port GEN: Generated write transaction at address %0h", $time, current_address);
     endtask
 
     // virtual task random_delay();
@@ -52,11 +45,11 @@ class generator;
             pkt.we == 1'b0; 
             pkt.addr == current_address;
         }) begin
-            $error("[%0t] GEN: Failed to randomize read transaction", $time);
+            $error("[%0t] basic_read_write_single_port GEN: Failed to randomize read transaction", $time);
         end
         
         gen2drv.put(pkt);
-        $display("[%0t] GEN: Generated read transaction at address %0h", $time, current_address);
+        $display("[%0t] basic_read_write_single_port GEN: Generated read transaction at address %0h", $time, current_address);
     endtask
 
     virtual function void configure_transaction(transaction pkt);
@@ -65,6 +58,10 @@ class generator;
             // random_delay();
             read_transaction(); 
         
+    endfunction
+
+    function void set_burst_n_size(int size);
+        burst_n_size = size;
     endfunction
 
 endclass

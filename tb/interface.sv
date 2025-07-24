@@ -1,26 +1,11 @@
-interface porta_if ();
+interface port_if (input bit clk, input bit rst_n);
 
-logic clk;
-logic rst;
-logic [7:0] data_a;
-logic [5:0] addr_a;
-logic we_a;
-logic valid_a;
-logic ready_a;
-logic [7:0] q_a;
+logic [`WIDTH-1:0] data;
+logic [$clog2(`DEPTH)-1:0] addr;
+logic we;
+logic valid;
+logic ready;
+logic [`WIDTH-1:0] q;
 
-
-endinterface
-
-interface portb_if ();
-
-logic clk;
-logic rst;
-logic [7:0] data_b;
-logic [5:0] addr_b;
-logic we_b;
-logic valid_b;
-logic ready_b;
-logic [7:0] q_b;
 
 endinterface
