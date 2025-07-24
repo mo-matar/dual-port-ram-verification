@@ -1,8 +1,23 @@
 class agent;
     generator gen;
+    mailbox gen2drv;
+    mailbox mon2scb;
     driver drv;
     monitor mon;
     virtual port_if vif;
+
+
+    function build();
+        // connect interfaces
+        gen.vif = vif;
+        drv.vif = vif;
+        mon.vif = vif;
+
+        // connect mailboxes
+        gen.gen2drv = this.gen2drv;
+        mon.mon2scb = this.mon2scb;
+        drv.gen2drv = this.gen2drv;
+    endfunction
 
     function new();
         gen = new(); 
@@ -23,5 +38,4 @@ class agent;
         join_none
     endtask
 endclass
-    endtask
-endclass
+

@@ -17,15 +17,17 @@ class env;
     // connect interfaces
     agent_a.vif = vif_a;
     agent_b.vif = vif_b;
-    //connect mailboxes
-    agent_a.gen.gen2drv = gen2drv_a;
-    agent_a.drv.gen2drv = gen2drv_a;
-    agent_a.mon.mon2scb = mon2scb_a;
 
-    agent_b.gen.gen2drv = gen2drv_b;
-    agent_b.drv.gen2drv = gen2drv_b;
-    agent_b.mon.mon2scb = mon2scb_b;
+    agent_b.gen2drv = this.gen2drv_b;
+    agent_a.gen2drv = this.gen2drv_a;
+    agent_b.mon2scb = this.mon2scb_b;
+    agent_a.mon2scb = this.mon2scb_a;
+
+    agent_a.build();
+    agent_b.build();
+
     //! will there be two mailboxes for the scoreboard?
+    //YES
     sb.mon2scb_a = mon2scb_a;
     sb.mon2scb_b = mon2scb_b;
 

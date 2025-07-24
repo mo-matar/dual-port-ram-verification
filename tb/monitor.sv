@@ -11,15 +11,17 @@ class monitor;
 
         forever begin
             transaction pkt;
-            @(posedge vif.clk);
+            @(posedge vif.clk iff (vif.ready==1 && vif.valid == 1));
         
             pkt = new;
-            pkt.data = vif.data;
             pkt.addr = vif.addr;
             pkt.we = vif.we;
-            pkt.valid = vif.valid;
-            pkt.ready = vif.ready;
-            pkt.q = vif.q;
+            if(vif.we) begin
+                pkt.data = vif.data;
+            end else begin
+                pkt.data = vif.q;
+            end
+            pkt.data = vif.q;
             pkt.rst_n = vif.rst_n;
 
             pkt.display("MON");

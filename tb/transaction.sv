@@ -2,11 +2,12 @@ class transaction;
 
     rand bit [7:0] data;
     rand bit [5:0] addr; // address might be randc
-    bit ready;
+    // bit ready;
     rand bit we;
-    bit valid;
-    bit [7:0] q;
+    // bit valid;
+    // bit [7:0] q;
     // bit rst_n;
+    rand integer delay;
 
     function transaction copy();
         copy = new;

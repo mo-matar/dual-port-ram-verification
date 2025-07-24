@@ -18,7 +18,7 @@ class generator;
     virtual task run();
         if(!active) return;
 
-        no_transactions = TestRegistry::get_int("NoOfTransactions", 100);
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
         current_address = 0;  
         $display("[%0t] GEN: Starting test with %0d transactions", $time, no_transactions);
 
@@ -34,6 +34,7 @@ class generator;
         
         if (!pkt.randomize() with {
             pkt.we == 1'b1;  // Force write operations
+            delay == 5;
         }) begin
             $error("[%0t] GEN: Failed to randomize transaction", $time);
         end
