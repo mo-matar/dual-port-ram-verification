@@ -8,20 +8,22 @@ class transaction;
     // bit [7:0] q;
     // bit rst_n;
     rand integer delay;
+  
+  constraint del_const {delay == 5;}
 
     function transaction copy();
         copy = new;
         copy.data = this.data;
         copy.addr = this.addr;
-        copy.ready = this.ready;
+//         copy.ready = this.ready;
         copy.we = this.we;
-        copy.valid = this.valid;
-        copy.q = this.q;
+//         copy.valid = this.valid;
+//         copy.q = this.q;
     endfunction
 
 
-    function void display();
-        $display("[%0t] Transaction: data=%0h, addr=%0h, we=%0b, valid=%0b, q=%0h, rst_n=%0b", $time, data, addr, we, valid, q, rst_n);
+  function void display(string port_name = "XXXX", string tag="");
+    $display("[%s] T=%0t [%s] Transaction: data=%0h, addr=%0h, we=%0b delay=%0d", port_name, $time, tag, data, addr, we, delay);
     endfunction
 
 endclass

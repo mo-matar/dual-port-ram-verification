@@ -5,11 +5,13 @@ class agent;
     driver drv;
     monitor mon;
     virtual port_if vif;
+    string port_name;
 
 
-    function build();
+    function void build();
         // connect interfaces
-        gen.vif = vif;
+        $display("Building agent on %s...", port_name);
+        //gen.vif = vif;
         drv.vif = vif;
         mon.vif = vif;
 
@@ -19,23 +21,27 @@ class agent;
         drv.gen2drv = this.gen2drv;
     endfunction
 
-    function new();
-        gen = new(); 
-        drv = new();
-        mon = new();
+    function new(string port_name = "port_a");
+              this.port_name = port_name;
+      this.gen2drv = new;
+
+        this.gen = new(port_name); 
+        this.drv = new(port_name);
+        this.mon = new(port_name);
     endfunction
     
-    // function void set_generator(generator g);
-    //     gen = g;
-    //     gen.set_mailbox(drv.gen2drv);
-    // endfunction
+    function void set_generator(generator g);
+        this.gen = g;
+    endfunction
 
     task run();
+        $display("Running agent on %s...", port_name);
         fork
+          $display("forking agent ");
             gen.run();
             drv.run();
             mon.run();
-        join_none
+        join_any;
     endtask
 endclass
 

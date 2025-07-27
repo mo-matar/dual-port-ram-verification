@@ -3,22 +3,22 @@ module tb_dual_port_ram;
   logic clk;
   logic rst_n; 
   
-  ram_if port_a_if(clk, rst_n);
-  ram_if port_b_if(clk, rst_n);
+  port_if port_a_if(clk, rst_n);
+  port_if port_b_if(clk, rst_n);
   
-  dual_port_ram dut (
-    .clk_a(port_a_if.clk),
+  dpram dut (
+    .clk(clk),
     .rst_n(rst_n), 
     .addr_a(port_a_if.addr),
     .data_a(port_a_if.data),
     .we_a(port_a_if.we),
     
-    .clk_b(port_b_if.clk),
+//     .clk_b(port_b_if.clk),
     .addr_b(port_b_if.addr),
     .data_b(port_b_if.data),
     .we_b(port_b_if.we),
     .q_a(port_a_if.q),
-    .q_b(port_b_if.q)
+    .q_b(port_b_if.q),
 
     .valid_a(port_a_if.valid),
     .valid_b(port_b_if.valid),
@@ -26,10 +26,9 @@ module tb_dual_port_ram;
     .ready_b(port_b_if.ready)
   );
   
-  port_agent agent_a;
-  port_agent agent_b;
   
   initial begin
+    rst_n = 1'b1;
     clk = 0;
     forever #5 clk = ~clk;
   end
@@ -43,23 +42,33 @@ module tb_dual_port_ram;
   endtask
   
   initial begin
-      test_names_e test_type;
+      string test_type;
       test t;
+      string test_type_str;
       
       
-      if ($value$plusargs("TEST=%s", test_type_str))
-          test_type = test_names_e'(test_type_str);
+      if ($value$plusargs("TEST=%s", test_type_str))        
+          test_type = test_type_str;
       else
-          test_type = basic_write_read_porta; // Default
+          test_type = "basic_write_read_porta"; // Default
+    
+            $display("argv = %s", test_type_str);
+
       
       
       t = test_factory::create_test(test_type);
+            
       
+      t.e0.vif_a = port_a_if;
+      t.e0.vif_b = port_b_if;
       
-      t.e0.vif_a = vif_a;
-      t.e0.vif_b = vif_b;
-      
-      
+    $display("yo????????????????????????????????????????????????????????????");
       t.run();
+
   end
+  
+  initial begin 
+    $dumpfile("dump.vcd"); $dumpvars;
+  end
+  
 endmodule

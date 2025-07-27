@@ -3,8 +3,8 @@ class env;
   agent agent_a;
   agent agent_b;
   scoreboard sb;
-  mailbox gen2drv_a;
-  mailbox gen2drv_b;
+//   mailbox gen2drv_a;
+//   mailbox gen2drv_b;
   mailbox mon2scb_a;
   mailbox mon2scb_b;
   virtual port_if vif_a;
@@ -13,15 +13,19 @@ class env;
   //!coverage collector???
 
 
-  function build();
+  function void build();
     // connect interfaces
-    agent_a.vif = vif_a;
-    agent_b.vif = vif_b;
+    $display("Building environment...");
+    agent_a.vif = this.vif_a;
+    agent_b.vif = this.vif_b;
 
-    agent_b.gen2drv = this.gen2drv_b;
-    agent_a.gen2drv = this.gen2drv_a;
+//     agent_b.gen2drv = this.gen2drv_b;
+//     agent_a.gen2drv = this.gen2drv_a;
     agent_b.mon2scb = this.mon2scb_b;
     agent_a.mon2scb = this.mon2scb_a;
+    
+    sb.mon2scb_a = this.mon2scb_a;
+    sb.mon2scb_b = this.mon2scb_b;
 
     agent_a.build();
     agent_b.build();
@@ -34,21 +38,30 @@ class env;
   endfunction
 
   function new();
-    gen2drv_a = new();
-    gen2drv_b = new();
-    mon2scb_a = new();
-    mon2scb_b = new();
-    agent_a = new();
-    agent_b = new();
-    sb = new();
+//     gen2drv_a = new();
+//     gen2drv_b = new();
+    this.agent_a = new("port_a");
+    this.agent_b = new("port_b");
+    this.mon2scb_a = new();
+    this.mon2scb_b = new();
+
+    this.sb = new();
   endfunction
 
 
   task run();
-    build();
+    $display("Running environment...");
+    
     fork
-      agent_a.run();
-      agent_b.run();
+      begin
+        fork
+          agent_a.run();
+          agent_b.run();
+    	join
+        
+      end
+      
+      
       sb.run();
     join_any
   endtask
