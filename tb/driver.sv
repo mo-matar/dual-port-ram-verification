@@ -45,6 +45,7 @@ class driver;
             // might need an event here to signal completion for generator
             //-> drv_done;
         end
+              $display("~~~~~~~~~~~~~DRV END~~~~~~~~~~~~~~~~~~~~~~");
     endtask
 
     

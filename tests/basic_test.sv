@@ -12,17 +12,25 @@ class test;
 
     virtual task run();
       $display("Running test!!");
-      TestRegistry::set_int("NoOfTransactions",50);
+      TestRegistry::set_int("NoOfTransactions",100);
         
         configure_test();
         e0.build();
         
         fork
             e0.run();
-        join_none
-        #1000;
+          join
+      $display("!!!!!!!!!!!!!!!!!!!END TEST!!!!!!!!!!!!!!!!!!!");
+
+      
+        #500;
+      e0.final_report();
         $finish;
         //e0.report_coverage();
+    endtask
+
+    virtual task final_report();
+        e0.final_report();
     endtask
     
     virtual task configure_test();

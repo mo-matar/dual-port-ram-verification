@@ -23,7 +23,7 @@ class agent;
 
     function new(string port_name = "port_a");
               this.port_name = port_name;
-      this.gen2drv = new;
+      this.gen2drv = new(1);
 
         this.gen = new(port_name); 
         this.drv = new(port_name);
@@ -36,12 +36,32 @@ class agent;
 
     task run();
         $display("Running agent on %s...", port_name);
-        fork
-          $display("forking agent ");
-            gen.run();
-            drv.run();
-            mon.run();
+        fork : f1
+          begin
+            $display("begin gen");
+                        gen.run();
+            $display("end gen");
+//             #100;
+//             disable f1;
+
+
+          end
+           begin
+             $display("begin drv");
+             drv.run();
+             $display("end drv");
+
+
+          end
+           begin
+             $display("begin mon");
+                         mon.run();
+             $display("end mon");
+
+
+          end
         join_any;
+      $display("[%s] YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",port_name);
     endtask
 endclass
 

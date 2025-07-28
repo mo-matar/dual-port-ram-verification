@@ -34,6 +34,8 @@ class monitor;
 //             pkt.display(port_name, "MON");
             mon2scb.put(pkt);
         end
+                    $display("~~~~~~~~~~~~~MON END~~~~~~~~~~~~~~~~~~~~~~");
+
 
     endtask
         

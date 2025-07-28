@@ -8,8 +8,9 @@ class test_factory;
         
         case(test_type)
             "basic_write_read_porta": begin
-                t = basic_write_read_porta_test::new("basic_write_read_porta");
-                //t = porta_test;
+                basic_write_read_porta_test porta_test;
+              porta_test = new("basic_write_read_porta");
+                t = porta_test;
             end
             "basic_write_read_portb": begin
                 basic_write_read_portb_test portb_test;
@@ -18,9 +19,8 @@ class test_factory;
             end
 
             default: begin
-                basic_write_read_porta_test porta_test;
-                porta_test = new("basic_write_read_porta");
-                t = porta_test;
+                t = new;
+
             end
         endcase
         

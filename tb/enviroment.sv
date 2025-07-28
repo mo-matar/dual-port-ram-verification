@@ -48,6 +48,10 @@ class env;
     this.sb = new();
   endfunction
 
+ task final_report();
+    $display("Final Report:");
+    sb.scb_summary();
+  endtask
 
   task run();
     $display("Running environment...");

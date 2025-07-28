@@ -8,6 +8,8 @@ class generator;
     int current_address;
     bit active;
     string port_name;
+    typedef enum { READ, WRITE, WRITE_READ } transaction_type;
+  int count;
 
     function new(string port_name = "port_a");
         this.port_name = port_name;
@@ -15,21 +17,25 @@ class generator;
     endfunction
 
     virtual task run();
+      count = 0;
         $display("Running generator on %s...", port_name);
         //print the status of the current port
         $display("[%0t] GEN: Port %s is %s", $time, port_name, active ? "active" : "inactive");
-        if(!active) return;
+        //if(!active) return;
 
         no_transactions = TestRegistry::get_int("NoOfTransactions");
         current_address = 0;  
         $display("[%0t] GEN: Starting test with %0d transactions", $time, no_transactions);
 
         repeat(no_transactions) begin
-            $display("[%0t] GEN: Generating transaction %0d", $time, no_transactions);
+          count++;
+          $display("[%0t] GEN: Generating transaction %0d", $time, count);
             write_transaction();
             read_transaction();
             // configure_transaction(pkt);
         end
+      $display("~~~~~~~~~~~~~GEN END~~~~~~~~~~~~~~~~~~~~~~");
+
     endtask
 
     virtual task write_transaction();
@@ -47,6 +53,7 @@ class generator;
         gen2drv.put(pkt);
       pkt.display("GEN write");
 //       $display("[T=%0t] GEN: Generated write transaction at address %0h", $time, current_address);
+      
     endtask
 
     // virtual task random_delay();
