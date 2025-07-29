@@ -19,14 +19,16 @@ class driver;
             pkt.display(port_name, "DRV before delay");
             @(posedge vif.clk iff vif.ready==1);
             fork
-              if(pkt.delay > 0) begin
-                    vif.valid <= 1'b0;
+              begin
                     repeat(pkt.delay) begin
+                        vif.valid <= 1'b0;
                         @(posedge vif.clk);
                     end
                 end
-                
-                @(negedge vif.rst_n);
+                begin
+                    @(negedge vif.rst_n);
+                    vif.valid <= 1'b0;  
+                end
             join_any
             disable fork;
             pkt.display(port_name, "DRV after delay");

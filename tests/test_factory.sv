@@ -24,10 +24,17 @@ class test_factory;
                 t = porta_portb_test;
             end
 
+            "fill_memory_porta_write_portb_read": begin
+                fill_memory_porta_write_portb_read_test fill_test;
+                fill_test = new("fill_memory_porta_write_portb_read");
+                t = fill_test;
+            end
+
             default: begin
                 t = new;
 
             end
+
         endcase
         
         return t;

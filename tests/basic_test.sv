@@ -22,7 +22,7 @@ class test;
           join
 
       
-        #500;
+        #100;
       e0.final_report();
         $finish;
         //e0.report_coverage();

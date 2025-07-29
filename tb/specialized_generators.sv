@@ -150,3 +150,87 @@ class basic_portb_write_porta_read_gen_b extends generator;
 
 endclass
 
+// Fill memory through Port A and read through Port B
+class fill_memory_porta_write_portb_read_gen_a extends generator;
+    event mem_filled;
+    bit [$clog2(`DEPTH)-1:0] current_addr = '{default: 0};
+
+    function new();
+        super.new();
+    endfunction
+
+    virtual task write_transaction();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b1;  // Force write operations
+            pkt.delay == 0;
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.addr = current_addr; // Use current address for writing
+        current_addr++;
+        pkt.display(port_name, "GEN write");
+        gen2drv.put(pkt);
+
+    endtask
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = `DEPTH; // Fill all memory locations
+        $display("[%0t] GEN: Starting fill memory test on Port A with %0d transactions", $time, no_transactions);
+
+        repeat(no_transactions) begin
+            write_transaction();
+        end
+
+        // Signal that memory is filled
+        -> mem_filled;
+
+
+    endtask
+
+endclass
+
+
+class fill_memory_portb_write_porta_read_gen_b extends generator;
+    event mem_filled;
+    bit [$clog2(`DEPTH)-1:0] current_addr = '{default: 0};
+
+    function new();
+        super.new();
+    endfunction
+
+    virtual task read_transaction();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b0;  // Force read operations
+            pkt.delay == 1;
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.addr = current_addr; // Use current address for reading
+        current_addr++;
+        pkt.display(port_name, "GEN read");
+        gen2drv.put(pkt);
+
+    endtask
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = `DEPTH; // Read all memory locations
+        $display("[%0t] GEN: Starting fill memory test on Port B with %0d transactions", $time, no_transactions);
+      wait(mem_filled.triggered); // Wait for memory to be filled by Port A
+        repeat(no_transactions) begin
+            read_transaction();
+        end
+
+
+    endtask
+
+endclass

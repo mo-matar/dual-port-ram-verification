@@ -57,6 +57,7 @@ module tb_dual_port_ram;
       
       t.e0.vif_a = port_a_if;
       t.e0.vif_b = port_b_if;
+    system_reset();
       
       t.run();
 

@@ -92,4 +92,27 @@ class fill_memory_porta_write_portb_read_test extends test;
 endclass
 
 
+// class B2B_transactions_porta_test extends test;
+//   /*Goal: test handling of continous writing on memory from  port A 
+//     write random data with random address from port A continously
+//     verify correct data and arbitration*/
+//     function new(string name = "B2B_transactions_porta_test");
+//         super.new(name);
+//     endfunction
+    
+//     virtual task configure_test();
+//         B2B_transactions_porta_gen_a gen_a;
+//         B2B_transactions_portb_gen_b gen_b;
+//         event B2B_transactions_done;
+//         gen_a = new();
+//         gen_b = new();
+//         gen_a.B2B_transactions_done = B2B_transactions_done;
+//         gen_b.B2B_transactions_done = B2B_transactions_done;
+//         e0.agent_a.set_generator(gen_a);
+//         e0.agent_b.set_generator(gen_b);
+//     endtask
+
+// endclass
+
+
          

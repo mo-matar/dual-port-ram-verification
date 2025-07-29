@@ -36,7 +36,6 @@ class generator;
         
         if (!pkt.randomize() with {
             pkt.we == 1'b1;  // Force write operations
-            delay == 5;
         }) begin
             $error("[%0t] GEN: Failed to randomize transaction", $time);
         end

@@ -18,8 +18,6 @@ class agent;
         gen.gen2drv = this.gen2drv;
         mon.mon2scb = this.mon2scb;
         drv.gen2drv = this.gen2drv;
-
-        
     endfunction
 
     function new(string port_name = "port_a");

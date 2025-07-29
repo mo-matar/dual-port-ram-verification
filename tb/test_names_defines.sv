@@ -12,7 +12,7 @@ typedef enum {
     simultaneous_write_read_same_address,
     out_of_range_memory_access,
     reset_test,
-    B2B_writes_porta,
+    B2B_transactions_porta,
     B2B_writes_portb,
     B2B_reads_porta,
     B2B_reads_portb,

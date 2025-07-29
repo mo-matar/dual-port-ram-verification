@@ -9,7 +9,7 @@ class transaction;
     // bit rst_n;
     rand integer delay;
   
-  constraint del_const {delay < 10;}
+  constraint del_const {delay == 0;}
 
     function transaction copy();
         copy = new;
