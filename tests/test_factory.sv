@@ -18,6 +18,12 @@ class test_factory;
                 t = portb_test;
             end
 
+            "basic_porta_write_portb_read": begin
+                basic_porta_write_portb_read_test porta_portb_test;
+                porta_portb_test = new("basic_porta_write_portb_read");
+                t = porta_portb_test;
+            end
+
             default: begin
                 t = new;
 

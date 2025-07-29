@@ -11,7 +11,6 @@ class agent;
     function void build();
         // connect interfaces
         $display("Building agent on %s...", port_name);
-        //gen.vif = vif;
         drv.vif = vif;
         mon.vif = vif;
 
@@ -19,6 +18,8 @@ class agent;
         gen.gen2drv = this.gen2drv;
         mon.mon2scb = this.mon2scb;
         drv.gen2drv = this.gen2drv;
+
+        
     endfunction
 
     function new(string port_name = "port_a");
@@ -36,32 +37,11 @@ class agent;
 
     task run();
         $display("Running agent on %s...", port_name);
-        fork : f1
-          begin
-            $display("begin gen");
-                        gen.run();
-            $display("end gen");
-//             #100;
-//             disable f1;
-
-
-          end
-           begin
-             $display("begin drv");
-             drv.run();
-             $display("end drv");
-
-
-          end
-           begin
-             $display("begin mon");
-                         mon.run();
-             $display("end mon");
-
-
-          end
+        fork
+           gen.run();
+           drv.run();
+           mon.run();
         join_any;
-      $display("[%s] YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",port_name);
     endtask
 endclass
 

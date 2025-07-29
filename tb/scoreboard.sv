@@ -1,14 +1,15 @@
-// `include "memory_defines.sv"
-`define START_ADDR 0
-`define END_ADDR (START_ADDR + `DEPTH - 1)
+// // `include "memory_defines.sv"
+// `define START_ADDR 0
+// `define END_ADDR (START_ADDR + `DEPTH - 1)
 class scoreboard;
     mailbox mon2scb_a;
     mailbox mon2scb_b;
     transaction pkt_a, pkt_b;
     int pass_a, fail_a, pass_b, fail_b;
+    virtual port_if vif;
 
 
-    reg [0:`DEPTH-1] mem_ref [bit [`WIDTH-1:0]];
+   bit [0:`DEPTH-1] mem_ref [bit [`WIDTH-1:0]] = '{default: 0};
 
     function void reset_memory();
         $display("Resetting memory reference...");
@@ -32,30 +33,35 @@ class scoreboard;
       return (addr >= 0 && addr < 64);
     endfunction
 
-      task run();
+      task automatic run();
 
         fork
             forever begin
                 mon2scb_a.get(pkt_a);
+
+                $display("time got pkt_a: %0t", $time);
+                pkt_a.display("port_a", "MBX received");
                 if (pkt_a.we == 1) begin
                     if(!address_is_legal(pkt_a.addr)) begin
-                        $display("SCB: Illegal address %0d accessed on port A", pkt_a.addr);
+                      $display("SCB: Illegal address %0h accessed on port A", pkt_a.addr);
                         fail_a++;
                     end
+                    $display("SCB A: Writing to ref at addr %0h with data %0h", pkt_a.addr, pkt_a.data);
                     mem_ref[pkt_a.addr] = pkt_a.data;
-                    pkt_a.display("SCB: written to ref");
+                    pkt_a.display("port_a", "SCB: written to ref");
                 end
                 else if (pkt_a.we == 0) begin
                     if (!address_is_legal(pkt_a.addr)) begin
-                        $display("SCB: Illegal address %0d accessed on port A", pkt_a.addr);
+                      $display("SCB: Illegal address %0h accessed on port A", pkt_a.addr);
                         fail_a++;
                         
                     end
+                    $display("SCB A: Reading from ref at addr %0h with expected data %0h", pkt_a.addr, mem_ref[pkt_a.addr]);
                     if (mem_ref[pkt_a.addr] !== pkt_a.data) begin
-                        $display("SCB: Mismatch Error at addr %0d: expected %0h, got %0h", pkt_a.addr, mem_ref[pkt_a.addr], pkt_a.data);
+                      $display("SCB: Mismatch Error at addr %0h: expected %0h, got %0h", pkt_a.addr, mem_ref[pkt_a.addr], pkt_a.data);
                         fail_a++;
                     end else begin
-                        $display("SCB: Match Passed at addr %0d: data %0h", pkt_a.addr, pkt_a.data);
+                      $display("SCB: Match Passed at addr %0h: data %0h", pkt_a.addr, pkt_a.data);
                         pass_a++;
                     end
                 end
@@ -65,25 +71,30 @@ class scoreboard;
 
             forever begin
                 mon2scb_b.get(pkt_b);
+                $display("time got pkt_b: %0t", $time);
+                pkt_b.display("port_b", "MBX received");
                 if (pkt_b.we == 1) begin
                     if(!address_is_legal(pkt_b.addr)) begin
-                        $display("SCB: Illegal address %0d accessed on port B", pkt_b.addr);
+                      $display("SCB: Illegal address %0h accessed on port B", pkt_b.addr);
                         fail_b++;
                     end
+                    $display("SCB B: Writing to ref at addr %0h with data %0h", pkt_b.addr, pkt_b.data);
                     mem_ref[pkt_b.addr] = pkt_b.data;
-                    pkt_b.display("SCB: written to ref on port B");
+                    pkt_b.display("port_b", "SCB: written to ref");
                 end
                 else if (pkt_b.we == 0) begin
                     if (!address_is_legal(pkt_b.addr)) begin
-                        $display("SCB: Illegal address %0d accessed on port B", pkt_b.addr);
+                      $display("SCB: Illegal address %0h accessed on port B", pkt_b.addr);
                         fail_b++;
                         
                     end
+                    $display("SCB B: Reading from ref at addr %0h with expected data %0h", pkt_b.addr, mem_ref[pkt_b.addr]);
+                    
                     if (mem_ref[pkt_b.addr] !== pkt_b.data) begin
-                        $display("SCB: Mismatch Error at addr %0d: expected %0h, got %0h", pkt_b.addr, mem_ref[pkt_b.addr], pkt_b.data);
+                      $display("SCB: Mismatch Error at addr %0h: expected %0h, got %0h", pkt_b.addr, mem_ref[pkt_b.addr], pkt_b.data);
                         fail_b++;
                     end else begin
-                        $display("SCB: Match Passed at addr %0d: data %0h", pkt_b.addr, pkt_b.data);
+                      $display("SCB: Match Passed at addr %0h: data %0h", pkt_b.addr, pkt_b.data);
                         pass_b++;
                     end
                 end
@@ -92,46 +103,6 @@ class scoreboard;
             
         join
 
-        // forever begin
-        //     transaction pkt_a, pkt_b;
-        //     // Wait for transactions from monitors
-        //     fork
-        //      begin
-        //         mon2scb_a.get(pkt_a);
-        //         if (pkt_a.we == 1) begin
-        //             mem_ref[pkt_a.addr] = pkt_a.data;
-        //             pkt_a.display("SCB: written to ref");
-        //         end
-        //         else if (pkt_a.we == 0) begin
-        //             if (mem_ref[pkt_a.addr] !== pkt_a.data) begin
-        //                 $display("SCB: Mismatch Error at addr %0d: expected %0h, got %0h", pkt_a.addr, mem_ref[pkt_a.addr], pkt_a.data);
-        //                 fail_a++;
-        //             end else begin
-        //                 $display("SCB: Match Passed at addr %0d: data %0h", pkt_a.addr, pkt_a.data);
-        //                 pass_a++;
-        //             end
-        //         end
-        //     end
-            
-        //      begin
-        //         mon2scb_b.get(pkt_b);
-        //         if (pkt_b.we == 1) begin
-        //             mem_ref[pkt_b.addr] = pkt_b.data;
-        //             pkt_b.display("SCB: written to ref on port B");
-        //         end
-        //         else if (pkt_b.we == 0) begin
-        //             if (mem_ref[pkt_b.addr] !== pkt_b.data) begin
-        //                 $display("SCB: Mismatch Error at addr %0d: expected %0h, got %0h", pkt_b.addr, mem_ref[pkt_b.addr], pkt_b.data);
-        //                 fail_b++;
-        //             end else begin
-        //                 $display("SCB: Match Passed at addr %0d: data %0h", pkt_b.addr, pkt_b.data);
-        //                 pass_b++;
-        //             end
-        //         end
-        //     end
-        //     join_any
-        //     disable fork;
-        // end
     endtask
 
 

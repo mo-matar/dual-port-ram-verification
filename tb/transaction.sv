@@ -9,7 +9,7 @@ class transaction;
     // bit rst_n;
     rand integer delay;
   
-  constraint del_const {delay == 5;}
+  constraint del_const {delay < 10;}
 
     function transaction copy();
         copy = new;
@@ -23,7 +23,8 @@ class transaction;
 
 
   function void display(string port_name = "XXXX", string tag="");
-    $display("[%s] T=%0t [%s] Transaction: data=%0h, addr=%0h, we=%0b delay=%0d", port_name, $time, tag, data, addr, we, delay);
-    endfunction
+    $display("[%s]\t T=%8t\t [%15s] \t: data=%02h,\t addr=%02h,\t we=%1b,\t delay=%d",
+             port_name, $time, tag, data, addr, we, delay);
+  endfunction
 
 endclass

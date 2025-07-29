@@ -18,9 +18,8 @@ class env;
     $display("Building environment...");
     agent_a.vif = this.vif_a;
     agent_b.vif = this.vif_b;
-
-//     agent_b.gen2drv = this.gen2drv_b;
-//     agent_a.gen2drv = this.gen2drv_a;
+    sb.vif = this.vif_a; 
+    // connect mailboxes
     agent_b.mon2scb = this.mon2scb_b;
     agent_a.mon2scb = this.mon2scb_a;
     
@@ -30,16 +29,13 @@ class env;
     agent_a.build();
     agent_b.build();
 
-    //! will there be two mailboxes for the scoreboard?
-    //YES
     sb.mon2scb_a = mon2scb_a;
     sb.mon2scb_b = mon2scb_b;
 
   endfunction
 
   function new();
-//     gen2drv_a = new();
-//     gen2drv_b = new();
+
     this.agent_a = new("port_a");
     this.agent_b = new("port_b");
     this.mon2scb_a = new();

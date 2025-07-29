@@ -45,17 +45,12 @@ module tb_dual_port_ram;
       string test_type;
       test t;
       string test_type_str;
-      
-      
-      if ($value$plusargs("TEST=%s", test_type_str))        
+
+      if ($value$plusargs("TEST=%s", test_type_str))
           test_type = test_type_str;
       else
-          test_type = "deee"; // Default
-        
-    
-            $display("argv = %s", test_type_str);
+          test_type = "default"; // Default
 
-      
       
       t = test_factory::create_test(test_type);
             
@@ -63,10 +58,7 @@ module tb_dual_port_ram;
       t.e0.vif_a = port_a_if;
       t.e0.vif_b = port_b_if;
       
-    $display("yo????????????????????????????????????????????????????????????");
       t.run();
-
-      //t.final_report();
 
   end
   

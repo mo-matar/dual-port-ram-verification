@@ -20,7 +20,6 @@ class test;
         fork
             e0.run();
           join
-      $display("!!!!!!!!!!!!!!!!!!!END TEST!!!!!!!!!!!!!!!!!!!");
 
       
         #500;
