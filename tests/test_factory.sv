@@ -30,6 +30,23 @@ class test_factory;
                 t = fill_test;
             end
 
+            "B2B_transactions_porta": begin
+                B2B_transactions_porta_test b2b_test;
+                b2b_test = new("B2B_transactions_porta");
+                t = b2b_test;
+            end
+
+            "default_mem_value": begin
+                default_mem_value_test default_test;
+                default_test = new("default_mem_value_test");
+                t = default_test;
+            end
+          "reset_test": begin
+                reset_test reset_t;
+                reset_t = new("reset_test");
+                t = reset_t;
+            end
+
             default: begin
                 t = new;
 

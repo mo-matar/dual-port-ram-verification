@@ -10,6 +10,7 @@ class generator;
     typedef enum { READ, WRITE, WRITE_READ, DISABLED } transaction_type;
     int count;
     int transaction_index;
+  event reset_system;
 
     function new(string port_name = "port_a");
         this.port_name = port_name;
@@ -17,9 +18,12 @@ class generator;
     endfunction
 
     virtual task run();
+      
       count = 0;
         $display("Running generator on %s...", port_name);
         $display("[%0t] GEN: Port %s is %s", $time, port_name, active ? "active" : "inactive");
+              if(!active) return;
+
 
         no_transactions = TestRegistry::get_int("NoOfTransactions");
         current_address = 0;  

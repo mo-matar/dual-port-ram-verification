@@ -2,6 +2,7 @@
 module tb_dual_port_ram;
   logic clk;
   logic rst_n; 
+  event reset_system;
   
   port_if port_a_if(clk, rst_n);
   port_if port_b_if(clk, rst_n);
@@ -57,10 +58,21 @@ module tb_dual_port_ram;
       
       t.e0.vif_a = port_a_if;
       t.e0.vif_b = port_b_if;
+      t.reset_system = reset_system;
     system_reset();
+    
       
       t.run();
+      
+      
+    
 
+  end
+  initial forever begin
+    
+        @(reset_system);
+        system_reset();
+      
   end
   
   initial begin 

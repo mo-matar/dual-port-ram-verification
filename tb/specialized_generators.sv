@@ -234,3 +234,137 @@ class fill_memory_portb_write_porta_read_gen_b extends generator;
     endtask
 
 endclass
+
+class B2B_transactions_porta_gen extends generator;
+    function new();
+        super.new();
+    endfunction
+  bit [`DEPTH-1: 0] current_addr = '{default: 0};
+
+    virtual task read_all_memory();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b0;  // Force read operations
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.addr = current_addr;
+        pkt.display(port_name, "GEN read all memory");
+        gen2drv.put(pkt);
+        current_addr++;
+
+        endtask
+
+    
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
+        $display("[%0t] GEN: Starting B2B transactions test on Port A with %0d transactions", $time, no_transactions);
+
+        repeat(no_transactions) begin
+            write_transaction();
+            read_transaction();
+        end
+      $display("begin delay of 100!!!");
+        #100;
+              $display("[%0t] ######################GEN: Starting read all memory test on Port A##############################", $time);
+      
+       
+
+        repeat(`DEPTH) begin
+            read_all_memory();
+        end
+      
+    endtask
+
+endclass
+
+
+class default_mem_value_gen extends generator;
+    function new(string port_name = "port_a");
+        super.new(port_name);
+    endfunction
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
+        $display("[%0t] GEN: Starting default memory value test on Port A with %0d transactions", $time, no_transactions);
+
+        repeat(no_transactions) begin
+            read_transaction();
+        end
+    endtask
+    endclass
+
+
+class reset_gen extends generator;
+    virtual port_if vif;
+    rand integer rst_delay;
+    bit [$clog2(`DEPTH)-1:0] current_addr = '{default: 0};
+    function new();
+        super.new(port_name);
+    endfunction
+
+    virtual task run();
+        if(!active) return;
+
+        fork
+            begin
+                no_transactions = TestRegistry::get_int("NoOfTransactions");
+                $display("[%0t] GEN: Starting B2B transactions test on Port A with %0d transactions", $time, no_transactions);
+
+                repeat(no_transactions) begin
+                    write_transaction();
+                    read_transaction();
+                end
+            end
+
+            begin
+                rst_delay = $urandom_range(16, 28); // Random reset delay
+                $display("[%0t] GEN: Applying reset after %0d clock cycles", $time, rst_delay);
+                repeat(rst_delay) @(posedge vif.clk);
+                -> reset_system;
+                $display("[%0t] GEN: Reset asserted", $time);               
+            end
+
+            
+        join_any
+        disable fork; 
+        #50;
+
+
+        //ensure memory has been reset
+        $display("[%0t] GEN: Reset complete, ensuring memory is reset to default values", $time);
+        repeat(`DEPTH) begin
+            read_all_memory();
+        end
+
+        
+    endtask
+
+
+    virtual task read_all_memory();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b0;  // Force read operations
+            pkt.delay == 1;
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.addr = current_address;
+        pkt.display(port_name, "GEN read all memory");
+        gen2drv.put(pkt);
+        current_addr++;
+
+        endtask
+
+
+
+endclass

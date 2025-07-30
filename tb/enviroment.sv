@@ -9,6 +9,8 @@ class env;
   mailbox mon2scb_b;
   virtual port_if vif_a;
   virtual port_if vif_b;
+  
+  event reset_system;
 
   //!coverage collector???
 
@@ -28,6 +30,9 @@ class env;
 
     agent_a.build();
     agent_b.build();
+    agent_a.reset_system = reset_system;
+    agent_b.reset_system = reset_system;
+    
 
     sb.mon2scb_a = mon2scb_a;
     sb.mon2scb_b = mon2scb_b;

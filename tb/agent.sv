@@ -6,6 +6,7 @@ class agent;
     monitor mon;
     virtual port_if vif;
     string port_name;
+  event reset_system;
 
 
     function void build();
@@ -16,6 +17,7 @@ class agent;
 
         // connect mailboxes
         gen.gen2drv = this.gen2drv;
+        gen.reset_system = this.reset_system;
         mon.mon2scb = this.mon2scb;
         drv.gen2drv = this.gen2drv;
     endfunction

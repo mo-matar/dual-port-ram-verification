@@ -2,12 +2,15 @@ import project_pkg::*;
 
 class test;
     env e0;
+    event reset_system;
     string test_name;
     
     function new(string test_name = "base_test");
       $display("object created!!!");
         e0 = new();
         this.test_name = test_name;
+            e0.reset_system = this.reset_system;
+
     endfunction
 
     virtual task run();

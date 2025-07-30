@@ -92,27 +92,67 @@ class fill_memory_porta_write_portb_read_test extends test;
 endclass
 
 
-// class B2B_transactions_porta_test extends test;
-//   /*Goal: test handling of continous writing on memory from  port A 
-//     write random data with random address from port A continously
-//     verify correct data and arbitration*/
-//     function new(string name = "B2B_transactions_porta_test");
-//         super.new(name);
-//     endfunction
+class B2B_transactions_porta_test extends test;
+  /*Goal: test handling of continous writing on memory from  port A 
+    write random data with random address from port A continously
+    verify correct data and arbitration*/
+    function new(string name = "B2B_transactions_porta_test");
+        super.new(name);
+    endfunction
     
-//     virtual task configure_test();
-//         B2B_transactions_porta_gen_a gen_a;
-//         B2B_transactions_portb_gen_b gen_b;
-//         event B2B_transactions_done;
-//         gen_a = new();
-//         gen_b = new();
-//         gen_a.B2B_transactions_done = B2B_transactions_done;
-//         gen_b.B2B_transactions_done = B2B_transactions_done;
-//         e0.agent_a.set_generator(gen_a);
-//         e0.agent_b.set_generator(gen_b);
-//     endtask
+    virtual task configure_test();
+        B2B_transactions_porta_gen gen_a;
+        gen_a = new();
+        e0.agent_a.set_generator(gen_a);
+        e0.agent_b.gen.active = 0;
+    endtask
 
-// endclass
+endclass
 
 
          
+
+class default_mem_value_test extends test;
+  /*Goal: verify default value of memory
+    read random addresses from memory
+    ensure data read is 0*/
+    
+    function new(string name = "default_mem_value_test");
+        super.new(name);
+    endfunction
+    
+    virtual task configure_test();
+        default_mem_value_gen gen_a;
+        default_mem_value_gen gen_b;
+        gen_a = new();
+        gen_b = new();
+        e0.agent_a.set_generator(gen_a);
+        e0.agent_b.set_generator(gen_b);
+    endtask
+
+endclass
+
+
+class reset_test extends test;
+  /*Goal: write random data and random address
+    apply reset
+    read same address
+    should read default 0 value from memory*/
+    
+    function new(string name = "reset_test");
+        super.new(name);
+    endfunction
+    
+    virtual task configure_test();
+        reset_gen gen_a;
+//         reset_gen gen_b;
+        gen_a = new();
+//         gen_b = new();
+        gen_a.vif = e0.vif_a;
+//         gen_b.vif = e0.vif_b;
+        e0.agent_a.set_generator(gen_a);
+        //e0.agent_b.set_generator(gen_b);
+        e0.agent_b.gen.active = 0;
+    endtask
+
+endclass
