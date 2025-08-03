@@ -84,7 +84,7 @@ module tb_dual_port_ram;
     system_reset();
     rst_delay = $urandom_range(10, 30); // Random reset delay
 
-    repeat(15) @(posedge clk);
+    repeat(rst_delay) @(posedge clk);
 
     
       

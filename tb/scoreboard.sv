@@ -6,7 +6,7 @@ class scoreboard;
     mailbox mon2scb_b;
     transaction pkt_a, pkt_b;
     int pass_a, fail_a, pass_b, fail_b;
-    virtual port_if vif;
+    virtual port_if vif_a, vif_b;
     event reset_system;
 
 
@@ -118,6 +118,19 @@ if(!TestRegistry::get_int("Disabledisplay"))
           forever begin
             @(reset_system)
             reset_memory();
+          end
+          //thread to check write read collision and bypass write value
+          forever begin
+            @(posedge vif_a.clk);
+            if((vif_a.valid && vif_b.valid) && (vif_a.addr == vif_b.addr) && (vif_a.we != vif_b.we)) begin
+              if(vif_b.we && !vif_a.arbiter_b)begin
+                mem_ref[vif_b.addr] = vif_b.data;
+              end
+              else if(vif_a.we && vif_b.arbiter_b) begin
+                mem_ref[vif_a.addr] = vif_a.data;
+              end
+
+          end
           end
             
         join

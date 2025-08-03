@@ -20,7 +20,10 @@ class env;
     $display("Building environment...");
     agent_a.vif = this.vif_a;
     agent_b.vif = this.vif_b;
-    sb.vif = this.vif_a; 
+    agent_a.other_vif = this.vif_b;
+    agent_b.other_vif = this.vif_a;
+    sb.vif_a = this.vif_a;
+    sb.vif_b = this.vif_b;
     // connect mailboxes
     agent_b.mon2scb = this.mon2scb_b;
     agent_a.mon2scb = this.mon2scb_a;

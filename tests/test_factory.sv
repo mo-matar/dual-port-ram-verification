@@ -35,6 +35,11 @@ class test_factory;
                 b2b_test = new("B2B_transactions_porta");
                 t = b2b_test;
             end
+            "B2B_transactions_portb": begin
+                B2B_transactions_portb_test b2b_test;
+                b2b_test = new("B2B_transactions_portb");
+                t = b2b_test;
+            end
 
             "default_mem_value": begin
                 default_mem_value_test default_test;
@@ -62,6 +67,16 @@ class test_factory;
                 simultaneous_write_read_same_address_test sim_write_read_test;
                 sim_write_read_test = new("simultaneous_write_read_same_address");
                 t = sim_write_read_test;
+            end
+            "simultaneous_read_different_address": begin
+                simultaneous_read_different_address_test sim_read_test;
+                sim_read_test = new("simultaneous_read_different_address");
+                t = sim_read_test;
+            end
+            "simultaneous_write_different_address": begin
+                simultaneous_write_different_address_test sim_write_test;
+                sim_write_test = new("simultaneous_write_different_address");
+                t = sim_write_test;
             end
 
             "B2B_transactions_both_ports": begin

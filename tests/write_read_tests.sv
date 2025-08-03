@@ -110,6 +110,24 @@ class B2B_transactions_porta_test extends test;
 endclass
 
 
+class B2B_transactions_portb_test extends test;
+  /*Goal: test handling of continous writing on memory from  port B
+    write random data with random address from port B continously
+    verify correct data and arbitration*/
+    function new(string name = "B2B_transactions_portb_test");
+        super.new(name);
+    endfunction
+    
+    virtual task configure_test();
+        B2B_transactions_portb_gen gen_b;
+        gen_b = new();
+        e0.agent_a.set_generator(gen_b);
+        e0.agent_a.gen.active = 0;
+    endtask
+
+endclass
+
+
          
 
 class default_mem_value_test extends test;
@@ -278,3 +296,63 @@ class B2B_transactions_both_ports_test extends test;
     endtask
 
 endclass
+
+class simultaneous_read_different_address_test extends test;
+  /*Goal: check the behaviour of memory with simultaneous read from different addresses
+    read from address , random data on  port A
+    read from same address , random data , on port B at same cycle
+    verify arbitration logic*/
+        logic [`ADDR_WIDTH-1:0] addr_q_porta[$];
+        logic [`ADDR_WIDTH-1:0] addr_q_portb[$];
+    int queue_size;
+    function new(string name = "simultaneous_read_different_address_test");
+        super.new(name);
+    endfunction
+    
+    virtual task configure_test();
+        simultaneous_read_different_address_gen gen_a;
+        simultaneous_read_different_address_gen gen_b;
+        queue_size = TestRegistry::get_int("NoOfTransactions");
+        for (int i = 0; i < queue_size; i++) begin
+            addr_q_porta.push_back( $urandom_range(0, `MEM_DEPTH/2) );
+            addr_q_portb.push_back( $urandom_range(`MEM_DEPTH/2 + 1, `MEM_DEPTH-1) );
+        end
+        gen_a = new();
+        gen_b = new();
+        e0.agent_a.set_generator(gen_a);
+        e0.agent_b.set_generator(gen_b);
+        gen_a.set_addresses(addr_q_porta);
+        gen_b.set_addresses(addr_q_portb);
+    endtask
+    endclass
+
+
+
+class simultaneous_write_different_address_test extends test;
+  /*Goal: check the behaviour of memory with simultaneous read from different addresses
+    read from address , random data on  port A
+    read from same address , random data , on port B at same cycle
+    verify arbitration logic*/
+        logic [`ADDR_WIDTH-1:0] addr_q_porta[$];
+        logic [`ADDR_WIDTH-1:0] addr_q_portb[$];
+    int queue_size;
+  function new(string name = "simultaneous_write_different_address_test");
+        super.new(name);
+    endfunction
+    
+    virtual task configure_test();
+        simultaneous_write_different_address_gen gen_a;
+        simultaneous_write_different_address_gen gen_b;
+        queue_size = TestRegistry::get_int("NoOfTransactions");
+        for (int i = 0; i < queue_size; i++) begin
+            addr_q_porta.push_back( $urandom_range(0, `MEM_DEPTH/2) );
+            addr_q_portb.push_back( $urandom_range(`MEM_DEPTH/2 + 1, `MEM_DEPTH-1) );
+        end
+        gen_a = new();
+        gen_b = new();
+        e0.agent_a.set_generator(gen_a);
+        e0.agent_b.set_generator(gen_b);
+        gen_a.set_addresses(addr_q_porta);
+        gen_b.set_addresses(addr_q_portb);
+    endtask
+    endclass

@@ -8,6 +8,9 @@ class transaction;
     // bit [7:0] q;
     // bit rst_n;
     rand integer delay;
+      time current_time;
+    bit start_of_transaction;
+    bit end_of_transaction;
   
   constraint del_const {delay >= 0; delay < 6; addr < 49152;}
 

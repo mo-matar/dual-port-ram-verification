@@ -5,6 +5,7 @@ class agent;
     driver drv;
     monitor mon;
     virtual port_if vif;
+    virtual port_if other_vif;
     string port_name;
   event reset_system;
 
@@ -14,6 +15,7 @@ class agent;
         $display("Building agent on %s...", port_name);
         drv.vif = vif;
         mon.vif = vif;
+        mon.other_vif = other_vif;
         gen.vif = vif;
 
         // connect mailboxes

@@ -6,6 +6,11 @@ logic we=0;
 logic valid=0;
 logic ready;
 logic [`WIDTH-1:0] q;
+bit arbiter_b;
+
+always_ff @(posedge clk) begin
+       arbiter_b <= ~arbiter_b;
+    end
 
 
 endinterface

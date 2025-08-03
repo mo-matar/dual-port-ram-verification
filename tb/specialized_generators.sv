@@ -22,6 +22,7 @@ class basic_write_read_porta_gen extends generator;
           write_transaction();
           read_transaction();
          // #80;
+          if(!TestRegistry::get_int("Disabledisplay"))
           $display("read delay");
 
           
@@ -286,6 +287,57 @@ class B2B_transactions_porta_gen extends generator;
     endtask
 
 endclass
+
+
+
+class B2B_transactions_portb_gen extends generator;
+    function new();
+        super.new();
+    endfunction
+  bit [`DEPTH-1: 0] current_addr = '{default: 0};
+
+    virtual task read_all_memory();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b0;  // Force read operations
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.addr = current_addr;
+        pkt.display(port_name, "GEN read all memory");
+        gen2drv.put(pkt);
+        current_addr++;
+
+        endtask
+
+    
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
+        $display("[%0t] GEN: Starting B2B transactions test on Port A with %0d transactions", $time, no_transactions);
+
+        repeat(no_transactions) begin
+            write_transaction();
+            read_transaction();
+        end
+      $display("begin delay of 100!!!");
+        #100;
+              $display("[%0t] ######################GEN: Starting read all memory test on Port A##############################", $time);
+      
+       
+
+      repeat(`DEPTH) begin
+            read_all_memory();
+        end
+      
+    endtask
+
+endclass
+
 
 
 class default_mem_value_gen extends generator;
@@ -614,4 +666,83 @@ class B2B_transactions_both_ports_gen extends generator;
 
 
 
+endclass
+
+
+
+class simultaneous_read_different_address_gen extends generator;
+    function new();
+        super.new();
+    endfunction
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
+        $display("[%0t] GEN: Starting simultaneous read different address test on Port A with %0d transactions", $time, no_transactions);
+
+        repeat(no_transactions) begin
+          repeat (8) @(posedge vif.clk);
+            read_transaction();
+            // write_transaction(); // Optional, can be included if needed
+        end
+    endtask
+
+    virtual task read_transaction();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b0;  // Force read operations
+            
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.addr = addr_q.pop_front(); // assign and remove the next address from the queue
+        pkt.display(port_name, "GEN read simultaneous different address");
+        gen2drv.put(pkt);
+    endtask
+endclass
+
+
+class simultaneous_write_different_address_gen extends generator;
+          int small_delay;
+
+    function new();
+        super.new();
+    endfunction
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
+        $display("[%0t] GEN: Starting simultaneous write different address test on both ports with %0d transactions", $time, no_transactions);
+
+        repeat(no_transactions) begin
+          repeat (8) @(posedge vif.clk);
+            write_transaction();
+        end
+        small_delay = $urandom_range(1, 5);
+        repeat(small_delay) @(posedge vif.clk);
+
+        repeat(`DEPTH) begin
+            read_all_memory();
+        end
+        
+    endtask
+
+    virtual task write_transaction();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b1;  // Force write operations
+
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.addr = addr_q.pop_front(); // assign and remove the next address from the queue
+        pkt.display(port_name, "GEN read simultaneous different address");
+        gen2drv.put(pkt);
+    endtask
 endclass
