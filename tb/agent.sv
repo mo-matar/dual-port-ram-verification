@@ -14,6 +14,7 @@ class agent;
         $display("Building agent on %s...", port_name);
         drv.vif = vif;
         mon.vif = vif;
+        gen.vif = vif;
 
         // connect mailboxes
         gen.gen2drv = this.gen2drv;
@@ -32,11 +33,14 @@ class agent;
     endfunction
     
     function void set_generator(generator g);
+        g.reset_system = this.reset_system;
         this.gen = g;
+        
     endfunction
 
     task run();
         $display("Running agent on %s...", port_name);
+        gen.reset_system = this.reset_system;
         fork
            gen.run();
            drv.run();

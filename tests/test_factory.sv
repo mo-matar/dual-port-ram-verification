@@ -47,6 +47,29 @@ class test_factory;
                 t = reset_t;
             end
 
+            "simultaneous_write_same_address": begin
+                simultaneous_write_same_address_test sim_test;
+                sim_test = new("simultaneous_write_same_address");
+                t = sim_test;
+            end
+
+            "out_of_range_memory_access": begin
+                out_of_range_memory_access_test out_of_range_test;
+                out_of_range_test = new("out_of_range_memory_access");
+                t = out_of_range_test;
+            end
+            "simultaneous_write_read_same_address": begin
+                simultaneous_write_read_same_address_test sim_write_read_test;
+                sim_write_read_test = new("simultaneous_write_read_same_address");
+                t = sim_write_read_test;
+            end
+
+            "B2B_transactions_both_ports": begin
+                B2B_transactions_both_ports_test b2b_both_test;
+                b2b_both_test = new("B2B_transactions_both_ports");
+                t = b2b_both_test;
+            end
+
             default: begin
                 t = new;
 

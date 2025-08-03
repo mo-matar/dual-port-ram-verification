@@ -12,11 +12,14 @@ class monitor;
     endfunction
 
     task run();
+      
         $display("Monitor: Initializing...");
 
         forever begin
             transaction pkt;
             @(posedge vif.clk iff (vif.ready==1 && vif.valid == 1));
+          
+          
           //@(posedge vif.clk);
         
             pkt = new;

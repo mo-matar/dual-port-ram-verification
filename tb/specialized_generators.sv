@@ -19,8 +19,12 @@ class basic_write_read_porta_gen extends generator;
         $display("[%0t] GEN: Starting basic write-read test on Port A with %0d transactions", $time, no_transactions);
 
         repeat(no_transactions) begin
-            write_transaction();
-            read_transaction();
+          write_transaction();
+          read_transaction();
+         // #80;
+          $display("read delay");
+
+          
             //! @(drv_done);??????????????????
         end
 
@@ -54,12 +58,12 @@ endclass
 class basic_porta_write_portb_read_gen_a extends generator;
     semaphore key;
    mailbox wrmb;
-    logic [$clog2(`DEPTH)-1:0] addr_q[$]; //same addresses for both ports
+    logic [`ADDR_WIDTH-1:0] addr_q[$]; //same addresses for both ports
     function new();
         super.new();
     endfunction
 
-    virtual task set_addresses(logic [$clog2(`DEPTH)-1:0] addr_q[$]);
+    virtual task set_addresses(logic [`ADDR_WIDTH-1:0] addr_q[$]);
         this.addr_q = addr_q;
     endtask
 
@@ -68,7 +72,7 @@ class basic_porta_write_portb_read_gen_a extends generator;
         
         if (!pkt.randomize() with {
             pkt.we == 1'b1;  // Force write operations
-            pkt.delay == 1;
+             pkt.delay == 1;
         }) begin
             $error("[%0t] GEN: Failed to randomize transaction", $time);
         end
@@ -102,14 +106,14 @@ endclass
 
 
 class basic_portb_write_porta_read_gen_b extends generator;
-    logic [$clog2(`DEPTH)-1:0] addr_q[$]; //same addresses for both ports
+    logic [`ADDR_WIDTH-1:0] addr_q[$]; //same addresses for both ports
   	semaphore key;
     mailbox wrmb;
     function new();
         super.new();
     endfunction
 
-    virtual task set_addresses(logic [$clog2(`DEPTH)-1:0] addr_q[$]);
+    virtual task set_addresses(logic [`ADDR_WIDTH-1:0] addr_q[$]);
         this.addr_q = addr_q;
     endtask
 
@@ -153,7 +157,7 @@ endclass
 // Fill memory through Port A and read through Port B
 class fill_memory_porta_write_portb_read_gen_a extends generator;
     event mem_filled;
-    bit [$clog2(`DEPTH)-1:0] current_addr = '{default: 0};
+    bit [`ADDR_WIDTH-1:0] current_addr = '{default: 0};
 
     function new();
         super.new();
@@ -197,7 +201,7 @@ endclass
 
 class fill_memory_portb_write_porta_read_gen_b extends generator;
     event mem_filled;
-    bit [$clog2(`DEPTH)-1:0] current_addr = '{default: 0};
+    bit [`ADDR_WIDTH-1:0] current_addr = '{default: 0};
 
     function new();
         super.new();
@@ -275,7 +279,7 @@ class B2B_transactions_porta_gen extends generator;
       
        
 
-        repeat(`DEPTH) begin
+      repeat(`DEPTH) begin
             read_all_memory();
         end
       
@@ -288,6 +292,19 @@ class default_mem_value_gen extends generator;
     function new(string port_name = "port_a");
         super.new(port_name);
     endfunction
+  
+    virtual task read_transaction();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b0; 
+        }) begin
+          $error("[T=%0t] GEN: Failed to randomize read transaction", $time);
+        end
+        
+        pkt.display(port_name, "GEN read");
+        gen2drv.put(pkt);
+    endtask
 
     virtual task run();
         if(!active) return;
@@ -302,10 +319,11 @@ class default_mem_value_gen extends generator;
     endclass
 
 
+
 class reset_gen extends generator;
     virtual port_if vif;
     rand integer rst_delay;
-    bit [$clog2(`DEPTH)-1:0] current_addr = '{default: 0};
+  bit [`ADDR_WIDTH-1:0] current_addr = '{default: 0};
     function new();
         super.new(port_name);
     endfunction
@@ -313,42 +331,208 @@ class reset_gen extends generator;
     virtual task run();
         if(!active) return;
 
-        fork
-            begin
+        
                 no_transactions = TestRegistry::get_int("NoOfTransactions");
                 $display("[%0t] GEN: Starting B2B transactions test on Port A with %0d transactions", $time, no_transactions);
 
                 repeat(no_transactions) begin
                     write_transaction();
-                    read_transaction();
                 end
-            end
+            
 
-            begin
+            
                 rst_delay = $urandom_range(16, 28); // Random reset delay
                 $display("[%0t] GEN: Applying reset after %0d clock cycles", $time, rst_delay);
                 repeat(rst_delay) @(posedge vif.clk);
                 -> reset_system;
+                  repeat(rst_delay) @(posedge vif.clk);
+
+                  repeat(`DEPTH) begin
+                    read_all_memory();
+                  end
+
                 $display("[%0t] GEN: Reset asserted", $time);               
-            end
 
-            
-        join_any
-        disable fork; 
-        #50;
-
-
-        //ensure memory has been reset
-        $display("[%0t] GEN: Reset complete, ensuring memory is reset to default values", $time);
-        repeat(`DEPTH) begin
-            read_all_memory();
-        end
 
         
     endtask
+  
+endclass;
+          
+          
+          class simultaneous_write_same_address_gen extends generator;
+    logic [`ADDR_WIDTH-1:0] addr_q[$]; //same addresses for both ports
+    function new();
+        super.new();
+    endfunction
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
+        $display("[%0t] GEN: Starting simultaneous write same address test on Port A with %0d transactions", $time, no_transactions);
+
+        repeat(no_transactions) begin
+                    #80;
+
+            write_transaction();
+            read_transaction();
+        end
+    endtask
+
+    virtual task write_transaction();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b1;  // Force write operations
+            pkt.delay == 0;
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+
+        pkt.addr = addr_q.pop_front(); // assign and remove the next address from the queue
+        current_address = pkt.addr; // Store the current address for read verification
+        pkt.display(port_name, "GEN write simultaneous");
+        gen2drv.put(pkt);
+    endtask
 
 
-    virtual task read_all_memory();
+    virtual task read_transaction();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b0;  // Force read operations
+            pkt.delay == 0;
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.addr = current_address; // Use the same address as written
+        pkt.display(port_name, "GEN read simultaneous");
+        gen2drv.put(pkt);
+    endtask
+
+
+    virtual task set_addresses(logic [`ADDR_WIDTH-1:0] addr_q[$]);
+        this.addr_q = addr_q;
+    endtask
+    
+
+endclass
+          
+          
+          
+class out_of_range_memory_access_gen_a extends generator;
+    rand integer write_addr;
+    function new();
+        super.new();
+    endfunction
+
+
+    virtual task write_transaction();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b1;  // Force write operations
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+      write_addr = $urandom_range(`DEPTH, 65535); // Generate out of range address
+
+
+        pkt.addr = write_addr;
+        pkt.display(port_name, "GEN write out of range");
+        gen2drv.put(pkt);
+              $display("[%0t] GEN: Writing to out of range address %0h, pkt: addr=%0h, data=%0h, we=%0b, delay=%0d", 
+             $time, write_addr, pkt.addr, pkt.data, pkt.we, pkt.delay);
+
+
+    endtask
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
+        $display("[%0t] GEN: Starting out of range memory access test on Port A with %0d transactions", $time, no_transactions);
+
+        repeat(no_transactions) begin
+           write_transaction();
+           // read_transaction();
+        end
+
+      repeat(`DEPTH)
+        read_all_memory();
+
+    endtask
+
+
+
+
+endclass
+          
+          
+          class simultaneous_write_read_same_address_gen_a extends generator;
+    function new();
+        super.new();
+    endfunction
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
+        $display("[%0t] GEN: Starting simultaneous write read same address test on Port A with %0d transactions", $time, no_transactions);
+        $display("filling memory with data...");
+//       repeat(`DEPTH-1)
+//         fill_memory();
+//         $display("memory filled, starting transactions...");
+//       #40;
+       // -> mem_filled; // Signal that memory is filled
+        repeat(no_transactions) begin
+          repeat (9)@(posedge vif.clk);
+
+            write_transaction();
+            end
+    endtask
+
+    virtual task write_transaction();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b1;  // Force write operations
+            pkt.delay == 1;
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.addr = addr_q.pop_front(); // assign and remove the next address from the queue
+        pkt.display(port_name, "GEN write simultaneous");
+        gen2drv.put(pkt);
+    endtask
+
+endclass
+
+
+class simultaneous_write_read_same_address_gen_b extends generator;
+    function new();
+        super.new();
+    endfunction
+
+    virtual task run();
+
+        if(!active) return;
+
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
+        $display("[%0t] GEN: Starting simultaneous write read same address test on Port B with %0d transactions", $time, no_transactions);
+       // @(mem_filled);
+        repeat(no_transactions) begin
+          repeat (9)@(posedge vif.clk);
+
+            read_transaction();
+
+            end
+    endtask
+
+    virtual task read_transaction();
         pkt = new();
         
         if (!pkt.randomize() with {
@@ -358,12 +542,75 @@ class reset_gen extends generator;
             $error("[%0t] GEN: Failed to randomize transaction", $time);
         end
         
-        pkt.addr = current_address;
-        pkt.display(port_name, "GEN read all memory");
+        pkt.addr = addr_q.pop_front(); // assign and remove the next address from the queue
+        pkt.display(port_name, "GEN read simultaneous");
         gen2drv.put(pkt);
-        current_addr++;
+    endtask
 
-        endtask
+endclass
+          
+          
+          
+class B2B_transactions_both_ports_gen extends generator;
+    rand int read_write; // 0 for read, 1 for write
+    function new();
+        super.new();
+    endfunction
+
+
+    virtual task write_transaction();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b1;  // Force write operations
+            pkt.delay == 0;
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.display(port_name, "GEN write B2B");
+        gen2drv.put(pkt);
+
+    endtask
+
+    virtual task read_transaction();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b0;  // Force read operations
+            pkt.delay == 0;
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.display(port_name, "GEN read B2B");
+        gen2drv.put(pkt);
+    endtask
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
+        $display("[%0t] GEN: Starting B2B transactions test on both ports with %0d transactions", $time, no_transactions);
+
+        repeat(no_transactions) begin
+
+            read_write = $urandom_range(0, 1);
+            if (read_write == 1) begin
+                write_transaction();
+            end else begin
+                read_transaction();
+            end
+        end
+
+        repeat(`DEPTH) begin
+            read_all_memory();
+        end
+
+
+    endtask
+
+
 
 
 

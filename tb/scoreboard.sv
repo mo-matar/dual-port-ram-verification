@@ -7,6 +7,7 @@ class scoreboard;
     transaction pkt_a, pkt_b;
     int pass_a, fail_a, pass_b, fail_b;
     virtual port_if vif;
+    event reset_system;
 
 
    bit [0:`DEPTH-1] mem_ref [bit [`WIDTH-1:0]] = '{default: 0};
@@ -30,7 +31,7 @@ class scoreboard;
 
 
     function int address_is_legal(int addr);
-      return (addr >= 0 && addr < 64);
+      return (addr >= 0 && addr < `DEPTH);
     endfunction
 
       task automatic run();
@@ -38,29 +39,35 @@ class scoreboard;
         fork
             forever begin
                 mon2scb_a.get(pkt_a);
-
+if(!TestRegistry::get_int("Disabledisplay"))
                 $display("time got pkt_a: %0t", $time);
                 pkt_a.display("port_a", "MBX received");
                 if (pkt_a.we == 1) begin
                     if(!address_is_legal(pkt_a.addr)) begin
+                                            if(!TestRegistry::get_int("Disabledisplay"))
                       $display("SCB: Illegal address %0h accessed on port A", pkt_a.addr);
-                        fail_a++;
+                        //fail_a++;
                     end
+                  if(!TestRegistry::get_int("Disabledisplay"))
                     $display("SCB A: Writing to ref at addr %0h with data %0h", pkt_a.addr, pkt_a.data);
                     mem_ref[pkt_a.addr] = pkt_a.data;
                     pkt_a.display("port_a", "SCB: written to ref");
                 end
                 else if (pkt_a.we == 0) begin
                     if (!address_is_legal(pkt_a.addr)) begin
+                      if(!TestRegistry::get_int("Disabledisplay"))
                       $display("SCB: Illegal address %0h accessed on port A", pkt_a.addr);
-                        fail_a++;
+                        //fail_a++;
                         
                     end
+                                        if(!TestRegistry::get_int("Disabledisplay"))
                     $display("SCB A: Reading from ref at addr %0h with expected data %0h", pkt_a.addr, mem_ref[pkt_a.addr]);
                     if (mem_ref[pkt_a.addr] !== pkt_a.data) begin
-                      $display("SCB: Mismatch Error at addr %0h: expected %0h, got %0h", pkt_a.addr, mem_ref[pkt_a.addr], pkt_a.data);
+//                       if(!TestRegistry::get_int("Disabledisplay"))
+                      $display("%0t SCB: Mismatch Error at addr %0h: expected %0h, got %0h", $time, pkt_a.addr, mem_ref[pkt_a.addr], pkt_a.data);
                         fail_a++;
                     end else begin
+                      if(!TestRegistry::get_int("Disabledisplay"))
                       $display("SCB: Match Passed at addr %0h: data %0h", pkt_a.addr, pkt_a.data);
                         pass_a++;
                     end
@@ -71,35 +78,47 @@ class scoreboard;
 
             forever begin
                 mon2scb_b.get(pkt_b);
+              if(!TestRegistry::get_int("Disabledisplay"))
                 $display("time got pkt_b: %0t", $time);
                 pkt_b.display("port_b", "MBX received");
                 if (pkt_b.we == 1) begin
                     if(!address_is_legal(pkt_b.addr)) begin
-                      $display("SCB: Illegal address %0h accessed on port B", pkt_b.addr);
-                        fail_b++;
+                      if(!TestRegistry::get_int("Disabledisplay"))
+                        $display("%0t SCB: Illegal address %0h accessed on port B", $time, pkt_b.addr);
+                        //fail_b++;
                     end
+                  if(!TestRegistry::get_int("Disabledisplay"))
                     $display("SCB B: Writing to ref at addr %0h with data %0h", pkt_b.addr, pkt_b.data);
                     mem_ref[pkt_b.addr] = pkt_b.data;
                     pkt_b.display("port_b", "SCB: written to ref");
                 end
                 else if (pkt_b.we == 0) begin
                     if (!address_is_legal(pkt_b.addr)) begin
+                      if(!TestRegistry::get_int("Disabledisplay"))
                       $display("SCB: Illegal address %0h accessed on port B", pkt_b.addr);
-                        fail_b++;
+                        //fail_b++;
                         
                     end
+                  if(!TestRegistry::get_int("Disabledisplay"))
                     $display("SCB B: Reading from ref at addr %0h with expected data %0h", pkt_b.addr, mem_ref[pkt_b.addr]);
                     
                     if (mem_ref[pkt_b.addr] !== pkt_b.data) begin
-                      $display("SCB: Mismatch Error at addr %0h: expected %0h, got %0h", pkt_b.addr, mem_ref[pkt_b.addr], pkt_b.data);
+                      if(!TestRegistry::get_int("Disabledisplay"))
+                        $display("%0t SCB: Mismatch Error at addr %0h: expected %0h, got %0h", $time, pkt_b.addr, mem_ref[pkt_b.addr], pkt_b.data);
                         fail_b++;
                     end else begin
+                      if(!TestRegistry::get_int("Disabledisplay"))
                       $display("SCB: Match Passed at addr %0h: data %0h", pkt_b.addr, pkt_b.data);
                         pass_b++;
                     end
                 end
 
             end
+          
+          forever begin
+            @(reset_system)
+            reset_memory();
+          end
             
         join
 

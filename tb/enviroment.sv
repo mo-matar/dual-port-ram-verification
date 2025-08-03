@@ -45,6 +45,7 @@ class env;
     this.agent_b = new("port_b");
     this.mon2scb_a = new();
     this.mon2scb_b = new();
+    
 
     this.sb = new();
   endfunction
@@ -62,6 +63,7 @@ class env;
         fork
           agent_a.run();
           agent_b.run();
+         // #200 ->reset_system;
     	join
         
       end
