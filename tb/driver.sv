@@ -17,7 +17,8 @@ class driver;
             vif.we <= pkt.we;
             vif.valid <= 1'b1;
             pkt.display(port_name, "DRV before delay");
-            @(posedge vif.clk iff vif.ready==1);
+          
+          @(posedge vif.clk iff vif.ready==1);
             fork
               begin
                     repeat(pkt.delay) begin

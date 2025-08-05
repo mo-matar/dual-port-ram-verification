@@ -8,6 +8,8 @@ class scoreboard;
     int pass_a, fail_a, pass_b, fail_b;
     virtual port_if vif_a, vif_b;
     event reset_system;
+    bit is_reset = 0;
+    event hold_reset;
 
 
    bit [0:`DEPTH-1] mem_ref [bit [`WIDTH-1:0]] = '{default: 0};
@@ -38,6 +40,7 @@ class scoreboard;
 
         fork
             forever begin
+              if(is_reset) continue;
                 mon2scb_a.get(pkt_a);
 if(!TestRegistry::get_int("Disabledisplay"))
                 $display("time got pkt_a: %0t", $time);
@@ -77,6 +80,7 @@ if(!TestRegistry::get_int("Disabledisplay"))
 
 
             forever begin
+              if(is_reset) continue;
                 mon2scb_b.get(pkt_b);
               if(!TestRegistry::get_int("Disabledisplay"))
                 $display("time got pkt_b: %0t", $time);
@@ -119,8 +123,13 @@ if(!TestRegistry::get_int("Disabledisplay"))
             @(reset_system)
             reset_memory();
           end
+          
+//           forever begin
+            
+//           end
           //thread to check write read collision and bypass write value
           forever begin
+            if(is_reset) continue;
             @(posedge vif_a.clk);
             if((vif_a.valid && vif_b.valid) && (vif_a.addr == vif_b.addr) && (vif_a.we != vif_b.we)) begin
               if(vif_b.we && !vif_a.arbiter_b)begin

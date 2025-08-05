@@ -3,10 +3,11 @@ import project_pkg::*;
 class test;
     env e0;
     event reset_system;
+    event hold_reset;
     string test_name;
     
     function new(string test_name = "base_test");
-      $display("object created!!!");
+      $display("object created!!");
         e0 = new();
         this.test_name = test_name;
 

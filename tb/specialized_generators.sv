@@ -746,3 +746,102 @@ class simultaneous_write_different_address_gen extends generator;
         gen2drv.put(pkt);
     endtask
 endclass
+
+
+
+class write_during_reset_gen extends generator;
+    function new();
+        super.new();
+    endfunction
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
+        $display("[%0t] GEN: Starting write during reset test on Port A with %0d transactions", $time, no_transactions);
+        -> this.hold_reset;
+        repeat(10) @(posedge vif.clk); // Wait for reset to propagate
+        repeat(no_transactions) begin
+            write_transaction();
+        end
+        repeat(10) @(posedge vif.clk); 
+        -> this.hold_reset;
+        repeat(10) @(posedge vif.clk); 
+
+        repeat(`DEPTH) begin
+            read_all_memory();
+        end
+        
+
+        $display("[%0t] GEN: Reset completed, continuing transactions", $time);
+    endtask
+endclass
+
+
+
+class B2B_transactions_both_ports_same_address_gen extends generator;
+    rand int read_write; // 0 for read, 1 for write
+    rand int random_addr;
+    function new();
+        super.new();
+    endfunction
+
+    virtual function set_address(int addr);
+        this.random_addr = addr;
+    endfunction
+
+
+    virtual task write_transaction();
+        pkt = new();
+
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b1;  // Force write operations
+            pkt.delay == 0;
+            pkt.addr == random_addr;
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.display(port_name, "GEN write B2B");
+        gen2drv.put(pkt);
+
+    endtask
+
+    virtual task read_transaction();
+        pkt = new();
+        
+        if (!pkt.randomize() with {
+            pkt.we == 1'b0;  // Force read operations
+            pkt.delay == 0;
+            pkt.addr == random_addr;
+        }) begin
+            $error("[%0t] GEN: Failed to randomize transaction", $time);
+        end
+        
+        pkt.display(port_name, "GEN read B2B");
+        gen2drv.put(pkt);
+    endtask
+
+    virtual task run();
+        if(!active) return;
+
+        no_transactions = TestRegistry::get_int("NoOfTransactions");
+        $display("[%0t] GEN: Starting B2B transactions test on both ports with %0d transactions", $time, no_transactions);
+        repeat(no_transactions) begin
+
+            read_write = $urandom_range(0, 1);
+            if (read_write == 1) begin
+                write_transaction();
+            end else begin
+                read_transaction();
+            end
+        end
+
+        repeat(`DEPTH) begin
+            read_all_memory();
+        end
+
+
+    endtask
+endclass

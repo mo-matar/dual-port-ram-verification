@@ -85,6 +85,18 @@ class test_factory;
                 t = b2b_both_test;
             end
 
+            "B2B_transactions_both_ports_same_address": begin
+                B2B_transactions_both_ports_same_address_test b2b_both_same_test;
+                b2b_both_same_test = new("B2B_transactions_both_ports_same_address");
+                t = b2b_both_same_test;
+            end
+
+            "write_during_reset": begin
+                write_during_reset_test write_reset_test;
+                write_reset_test = new("write_during_reset");
+                t = write_reset_test;
+            end
+
             default: begin
                 t = new;
 

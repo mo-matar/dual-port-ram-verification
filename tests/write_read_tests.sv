@@ -356,3 +356,52 @@ class simultaneous_write_different_address_test extends test;
         gen_b.set_addresses(addr_q_portb);
     endtask
     endclass
+
+
+
+class write_during_reset_test extends test;
+  /*Goal: verify correct operation when writing while reset
+    hold reset for some time
+    write while reset is being held
+    verify that writes do not affect memory*/
+    
+    function new(string name = "write_during_reset_test");
+        super.new(name);
+    endfunction
+    
+    virtual task configure_test();
+        write_during_reset_gen gen_a;
+        gen_a = new();
+        e0.agent_a.set_generator(gen_a);
+        e0.agent_b.gen.active = 1;
+        gen_a.vif = e0.vif_a;
+        gen_a.hold_reset = this.hold_reset;
+        e0.sb.hold_reset = this.hold_reset;
+    endtask
+
+endclass
+
+class B2B_transactions_both_ports_same_address_test extends test;
+  /*Goal: test continuous transactions on memory from both ports
+    random read or write
+    put random data on memory with random addresses
+    check if reference model has the same data as the memory*/
+    rand int random_addr;
+
+    function new(string name = "B2B_transactions_both_ports_same_address");
+        super.new(name);
+    endfunction
+    
+    virtual task configure_test();
+        B2B_transactions_both_ports_same_address_gen gen_a;
+        B2B_transactions_both_ports_same_address_gen gen_b;
+        gen_a = new();
+        gen_b = new();
+        random_addr = $urandom_range(0, `DEPTH-1);
+        gen_a.set_address(random_addr);
+        gen_b.set_address(random_addr);
+
+        e0.agent_a.set_generator(gen_a);
+        e0.agent_b.set_generator(gen_b);
+    endtask
+endclass

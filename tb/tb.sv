@@ -3,6 +3,7 @@ module tb_dual_port_ram;
   logic clk;
   logic rst_n; 
   event reset_system;
+  event hold_reset;
   
   port_if port_a_if(clk, rst_n);
   port_if port_b_if(clk, rst_n);
@@ -81,6 +82,7 @@ module tb_dual_port_ram;
       t.e0.vif_a = port_a_if;
       t.e0.vif_b = port_b_if;
       t.reset_system = reset_system;
+      t.hold_reset = hold_reset;
     system_reset();
     rst_delay = $urandom_range(10, 30); // Random reset delay
 
@@ -95,11 +97,17 @@ module tb_dual_port_ram;
 
   end
   initial forever begin
-    
-        @(reset_system);
-    $display("triggered reset!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    @(reset_system);
         system_reset();
       
+  end
+
+  initial forever begin
+    @(hold_reset);
+    rst_n = 1'b0;
+    repeat(2) @(posedge clk);
+    @(hold_reset);
+    rst_n = 1'b1;
   end
   
   initial begin 

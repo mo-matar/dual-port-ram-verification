@@ -43,7 +43,7 @@ class monitor;
             pkt.we = vif.we;
             pkt.current_time = $time;
             pkt.start_of_transaction = 0;
-            if(vif.we) begin
+            if(vif.we)begin
                 pkt.data = vif.data;
               pkt.display(port_name, "MON write");
             end else begin
@@ -52,7 +52,9 @@ class monitor;
               pkt.display(port_name, "MON read");
             end
             mon2scb.put(pkt);
+          
         end
+          
 
     endtask
         

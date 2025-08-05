@@ -15,6 +15,8 @@ class generator;
     int transaction_index;
   event reset_system;
       logic [`ADDR_WIDTH-1:0] addr_q[$]; //same addresses for both ports
+          event hold_reset;
+
 
 
     function new(string port_name = "port_a");
