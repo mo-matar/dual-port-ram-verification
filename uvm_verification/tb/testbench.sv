@@ -7,12 +7,12 @@ module tb_dual_port_ram;
   bit rst_n; 
 
   
-  port_if port_a_if(clk, rst_n);
-  port_if port_b_if(clk, rst_n);
+  port_if port_a_if(clk);
+  port_if port_b_if(clk);
   
   DP_MEM dut (
     .clk(clk),
-    .rstn(rst_n), 
+    .rstn(port_a_if.rst_n), 
     .addr_a(port_a_if.addr),
     .wr_data_a(port_a_if.wr_data),
     .op_a(port_a_if.op),
@@ -37,17 +37,17 @@ module tb_dual_port_ram;
     forever #5 clk = ~clk;
   end
   
-  task system_reset;
-            repeat(5) @(posedge clk);
+//   task system_reset;
+//             repeat(5) @(posedge clk);
 
-    rst_n = 1;
-    repeat(1) @(posedge clk);
-    rst_n = 0; 
-    repeat(5) @(posedge clk);
-    rst_n = 1; 
-        repeat(5) @(posedge clk);
+//     rst_n = 1;
+//     repeat(1) @(posedge clk);
+//     rst_n = 0; 
+//     repeat(5) @(posedge clk);
+//     rst_n = 1; 
+//         repeat(5) @(posedge clk);
 
-  endtask
+//   endtask
   
   initial begin
     uvm_config_db#(virtual port_if)::set(null, "uvm_test_top", "port_a_if", port_a_if);
