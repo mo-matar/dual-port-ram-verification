@@ -16,8 +16,9 @@ class dpram_driver extends uvm_driver #(dpram_item);
 
     virtual task run_phase(uvm_phase phase);
         super.run_phase(phase);
-        dpram_item item;
         forever begin 
+                  dpram_item item;
+
             seq_item_port.get_next_item(item);
             vif.wr_data <= item.data;
             vif.addr <= item.addr;

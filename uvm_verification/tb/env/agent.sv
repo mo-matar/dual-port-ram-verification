@@ -20,10 +20,11 @@ class dpram_agent extends uvm_agent;
 
     virtual function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
-        driver.dpram_ap.connect(sequencer.dpram_ap);
+        // Connect driver to sequencer
+        driver.seq_item_port.connect(sequencer.seq_item_export);
     endfunction
 
 endclass
 
 
-    
+

@@ -1,10 +1,10 @@
-class dpram_test extends uvm_test;
-    `uvm_component_utils(dpram_test)
+class base_test extends uvm_test;
+  `uvm_component_utils(base_test)
 
     dpram_env env;
-    dpram_sequence seq;
     virtual port_if vif_a;
     virtual port_if vif_b;
+
     function new(string name, uvm_component parent);
         super.new(name, parent);
     endfunction
@@ -13,29 +13,45 @@ class dpram_test extends uvm_test;
         super.build_phase(phase);
         env = dpram_env::type_id::create(.name("env"), .parent(this));
 
-            if(!uvm_config_db#(virtual alu_if)::get(this, "", "port_a_if", vif_a)) begin
+        // Get and set virtual interfaces for each agent
+        if(!uvm_config_db#(virtual port_if)::get(this, "", "port_a_if", vif_a)) begin
             `uvm_fatal("NOCONFIG", "No virtual interface found for vif_a")
-            end
-            uvm_config_db#(virtual alu_if)::set(this, "env.agent_a.*", "vif", vif_a);
+        end
+        uvm_config_db#(virtual port_if)::set(this, "env.agent_a.*", "vif", vif_a);
 
-            if(!uvm_config_db#(virtual alu_if)::get(this, "", "port_b_if", vif_b)) begin
+        if(!uvm_config_db#(virtual port_if)::get(this, "", "port_b_if", vif_b)) begin
             `uvm_fatal("NOCONFIG", "No virtual interface found for vif_b")
-            end
-            uvm_config_db#(virtual alu_if)::set(this, "env.agent_b.*", "vif", vif_b);
+        end
+        uvm_config_db#(virtual port_if)::set(this, "env.agent_b.*", "vif", vif_b);
+    endfunction
 
-        seq = dpram_sequence::type_id::create(.name("seq"), .parent(env.sequencer));
-        seq.randomize();
+//      function void start_of_simulation_phase(uvm_phase phase);
+//         super.start_of_simulation_phase(phase);
+//         if (uvm_report_enabled(UVM_HIGH)) begin
+//             this.print();
+//             factory.print();
+//         end
+//     endfunction
+
+endclass
+
+
+
+class dpram_test extends base_test;
+    `uvm_component_utils(dpram_test)
+
+    function new(string name, uvm_component parent);
+        super.new(name, parent);
     endfunction
 
     virtual task run_phase(uvm_phase phase);
-        super.run_phase(phase);
+        dpram_vseq vseq = dpram_vseq::type_id::create("vseq");
         phase.raise_objection(this);
-        seq.start(env.agent_a.sequencer);
-        seq.start(env.agent_b.sequencer);
-        #100;
+        vseq.start(env.v_sqr);
         phase.drop_objection(this);
     endtask
 
 endclass
 
-    
+
+
