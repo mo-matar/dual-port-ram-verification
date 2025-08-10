@@ -6,7 +6,7 @@ A dual port RAM verification project with valid-ready protocol environment imple
 This project contains two verification approaches:
 
 - **sv_verification/**: Traditional SystemVerilog verification environment with custom testbench components including generators, drivers, monitors, and scoreboard
-- **uvm_verification/**: Universal Verification Methodology (UVM) based environment with standardized components, sequences, agents, and comprehensive coverage model
+- **uvm_verification/**: Universal Verification Methodology (UVM) based environment with standardized components, sequences, agents, and comprehensive coverage model.
 
 Both environments verify the same dual-port RAM DUT with identical test scenarios to ensure thorough validation across different verification methodologies.
 
