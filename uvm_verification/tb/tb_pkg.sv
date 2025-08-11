@@ -14,11 +14,12 @@ package tb_pkg;
     `include "agent.sv"
     `include "scoreboard.sv"
     `include "virtual_sequencer.sv"
-    `include "env.sv"
     
     // Include RAL components
-//     `include "memory_ral_model.sv"
-//     `include "memory_reg_adapter.sv"
+     `include "reg_model.sv"
+     `include "adapter.sv"
+    `include "env.sv"
+
 //     `include "memory_reg_predictor.sv"
     
     // Include sequences

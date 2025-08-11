@@ -6,6 +6,10 @@ class dpram_env extends uvm_env;
     // Add virtual sequencer instance
     dpram_virtual_sequencer v_sqr;
     dpram_scoreboard scoreboard;
+    // add reg block
+    dpram_reg_block reg_blk;
+    // Add adapter
+    dpram_adapter adapter;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -18,7 +22,12 @@ class dpram_env extends uvm_env;
         scoreboard = dpram_scoreboard::type_id::create(.name("scoreboard"), .parent(this));
         // Create virtual sequencer
         v_sqr = dpram_virtual_sequencer::type_id::create(.name("v_sqr"), .parent(this));
-    endfunction 
+        // Create the reg block and build it
+        reg_blk = dpram_reg_block::type_id::create(.name("reg_blk"), .parent(this));
+        reg_blk.build();
+        // Create the adapter
+        adapter = dpram_adapter::type_id::create(.name("adapter"), .parent(this));
+    endfunction
 
     virtual function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
@@ -27,6 +36,14 @@ class dpram_env extends uvm_env;
         
         uvm_config_db#(dpram_sequencer)::set(this, "*", "porta_sqr", agent_a.sequencer);
         uvm_config_db#(dpram_sequencer)::set(this, "*", "portb_sqr", agent_b.sequencer);
+
+        // set the sequencer of the reg block
+        reg_blk.porta_map.set_sequencer(agent_a.sequencer, adapter);
+        reg_blk.portb_map.set_sequencer(agent_b.sequencer, adapter);
+        reg_blk.porta_map.set_base_addr(0);
+        reg_blk.portb_map.set_base_addr(0);
+
+        // specify the sequencer on which we want to execute the reg sequence
     endfunction
 
 endclass
