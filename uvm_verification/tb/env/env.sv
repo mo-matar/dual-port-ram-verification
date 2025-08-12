@@ -9,7 +9,8 @@ class dpram_env extends uvm_env;
     // add reg block
     dpram_reg_block reg_blk;
     // Add adapter
-    dpram_adapter adapter;
+    dpram_adapter adapter_a;
+    dpram_adapter adapter_b;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -26,7 +27,9 @@ class dpram_env extends uvm_env;
         reg_blk = dpram_reg_block::type_id::create(.name("reg_blk"), .parent(this));
         reg_blk.build();
         // Create the adapter
-        adapter = dpram_adapter::type_id::create(.name("adapter"), .parent(this));
+      adapter_a = dpram_adapter::type_id::create(.name("adapter_a"), .parent(this));
+      adapter_b = dpram_adapter::type_id::create(.name("adapter_b"), .parent(this));
+
     endfunction
 
     virtual function void connect_phase(uvm_phase phase);
@@ -38,8 +41,8 @@ class dpram_env extends uvm_env;
         uvm_config_db#(dpram_sequencer)::set(this, "*", "portb_sqr", agent_b.sequencer);
 
         // set the sequencer of the reg block
-        reg_blk.porta_map.set_sequencer(agent_a.sequencer, adapter);
-        reg_blk.portb_map.set_sequencer(agent_b.sequencer, adapter);
+        reg_blk.porta_map.set_sequencer(agent_a.sequencer, adapter_a);
+        reg_blk.portb_map.set_sequencer(agent_b.sequencer, adapter_b);
         reg_blk.porta_map.set_base_addr(0);
         reg_blk.portb_map.set_base_addr(0);
 

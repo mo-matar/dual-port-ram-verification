@@ -24,13 +24,20 @@ class dpram_driver extends uvm_driver #(dpram_item);
             vif.addr <= item.addr;
             vif.op <= item.op;
             vif.valid <= 1'b1;
+            `uvm_info("DPRAM_DRIVER", "before clock edge and ready", UVM_MEDIUM);
             @(posedge vif.clk iff vif.ready==1);
+                        `uvm_info("DPRAM_DRIVER", "before delay", UVM_MEDIUM);
+                                    item.data = vif.op ? vif.wr_data : vif.rd_data;
+            seq_item_port.item_done(item);
             fork
                 begin
                     repeat(item.delay) begin
                         vif.valid <= 1'b0;
                         @(posedge vif.clk);
+                        `uvm_info("DPRAM_DRIVER", "after delay cycle", UVM_MEDIUM);
+
                     end
+                    `uvm_info("DPRAM_DRIVER", "delay finished", UVM_MEDIUM);
                 end
                 begin
                     @(negedge vif.rst_n);
@@ -38,7 +45,8 @@ class dpram_driver extends uvm_driver #(dpram_item);
                 end
             join_any
             disable fork;
-            seq_item_port.item_done();
+
+            `uvm_info("DPRAM_DRIVER", item.convert2string(), UVM_MEDIUM);
         end
         endtask
 

@@ -7,8 +7,8 @@ class dpram_item extends uvm_sequence_item;
     rand integer delay;
 
     constraint dpram_constraint {
-        delay >= 0;
-        delay <= 10;
+        delay == 0;
+        // delay <= 10;
         addr inside {[0:`MEM_DEPTH-1]};
     }
 

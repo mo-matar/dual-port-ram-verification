@@ -26,10 +26,10 @@ class dpram_reg_block extends uvm_reg_block;
 
     function void build(); 
         // it is mandatory to specify backdoor in memory
-        add_hdl_path("dut", "RTL");
+      add_hdl_path("tb_dual_port_ram.dut", "RTL");
 
         mem = new("mem");
-        mem.add_hdl_path_slice("mem_inst.mem", 0, `DATA_WIDTH);
+      mem.add_hdl_path_slice("mem_inst.mem", 0, `DATA_WIDTH);
         mem.configure(this);
 
         porta_map = create_map("reg_map", 0, 4, UVM_LITTLE_ENDIAN, 0);
@@ -38,8 +38,8 @@ class dpram_reg_block extends uvm_reg_block;
         portb_map = create_map("portb_map", 0, 4, UVM_LITTLE_ENDIAN, 0);
         portb_map.add_mem(mem, 'h0);
 
-        porta_map.set_auto_predict(1);
-        portb_map.set_auto_predict(1);
+//         porta_map.set_auto_predict(1);
+//         portb_map.set_auto_predict(1);
 
         lock_model();
 

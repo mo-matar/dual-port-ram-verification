@@ -2,6 +2,7 @@ typedef uvm_sequencer #(dpram_item) dpram_sequencer;
 
 class dpram_agent extends uvm_agent;
     `uvm_component_utils(dpram_agent)
+  int active;
 
     dpram_sequencer sequencer;
     dpram_monitor monitor;

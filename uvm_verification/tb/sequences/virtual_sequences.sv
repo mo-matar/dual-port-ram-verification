@@ -2,6 +2,8 @@
 class dpram_vseq_base extends uvm_sequence;
     `uvm_object_utils(dpram_vseq_base)
     `uvm_declare_p_sequencer(dpram_virtual_sequencer)
+    dpram_reg_block reg_model;
+
 
     // Sub-sequencer handles for convenience in derived sequences
     dpram_sequencer porta_sqr;
@@ -31,8 +33,14 @@ class dpram_vseq extends dpram_vseq_base;
 
         seq_a = dpram_wr_rd_seq::type_id::create("seq_a");
         seq_b = dpram_wr_rd_seq::type_id::create("seq_b");
+        seq_a.reg_model = reg_model;
+        seq_b.reg_model = reg_model;
+        seq_a.map = reg_model.porta_map;
+      	seq_b.map = reg_model.portb_map;
         super.body();
         // Run basic write/read on both ports
+      `uvm_warning("2222222", $sformatf("2222222222222222"))
+
 
         fork
             begin
