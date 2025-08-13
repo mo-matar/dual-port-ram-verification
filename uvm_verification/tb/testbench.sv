@@ -52,7 +52,7 @@ module tb_dual_port_ram;
   initial begin
     uvm_config_db#(virtual port_if)::set(null, "uvm_test_top", "port_a_if", port_a_if);
     uvm_config_db#(virtual port_if)::set(null, "uvm_test_top", "port_b_if", port_b_if);
-    run_test("dpram_test");
+    run_test("read_operation_porta_test");
   end
   
   initial begin 

@@ -1,12 +1,17 @@
 `uvm_analysis_imp_decl(_a)
 `uvm_analysis_imp_decl(_b)
+
+// Define the global memory pool type
+typedef uvm_pool#(longint unsigned, bit[`DATA_WIDTH-1:0]) dpram_mem_pool_t;
+
 class dpram_scoreboard extends uvm_scoreboard;
     `uvm_component_utils(dpram_scoreboard)
 
     uvm_analysis_imp_a#(dpram_item, dpram_scoreboard) m_analysis_imp_a;
     uvm_analysis_imp_b#(dpram_item, dpram_scoreboard) m_analysis_imp_b;
 
-    bit [`DATA_WIDTH-1:0] mem_ref [longint unsigned];
+    // Global memory pool handle
+    dpram_mem_pool_t global_mem_pool;
 
     int unsigned pass_a, fail_a, pass_b, fail_b;
 
@@ -25,20 +30,33 @@ class dpram_scoreboard extends uvm_scoreboard;
 
     virtual function void build_phase(uvm_phase phase);
         super.build_phase(phase);
+        
+        // Get or create the global memory pool
+        global_mem_pool = dpram_mem_pool_t::get_global_pool();
+        
+        // Set the global memory pool in config_db for access from anywhere
+        // uvm_config_db#(dpram_mem_pool_t)::set(null, "*", "global_mem_pool", global_mem_pool);
+
         // Resolve reset events from the global event pool (optional)
         //uvm_event_pool pool = uvm_event_pool::get_global();
         //reset_system_e = pool.get("reset_system");
         //hold_reset_e  = pool.get("hold_reset");
 
-      if (!uvm_config_db#(virtual port_if)::get(null, "uvm_test_top", "port_a_if", vif_a))
+        if (!uvm_config_db#(virtual port_if)::get(null, "uvm_test_top", "port_a_if", vif_a))
             `uvm_fatal("DPRAM_SCB", "vif_a not set via config_db")
         if (!uvm_config_db#(virtual port_if)::get(null, "uvm_test_top", "port_b_if", vif_b))
             `uvm_fatal("DPRAM_SCB", "vif_b not set via config_db")
     endfunction
 
     function void reset_memory();
-        mem_ref.delete();
-        `uvm_info("DPRAM_SCB", "Resetting memory reference...", UVM_LOW)
+        longint unsigned key;
+        // Delete all entries from the global memory pool
+        if (global_mem_pool.first(key)) begin
+            do begin
+                global_mem_pool.delete(key);
+            end while (global_mem_pool.next(key));
+        end
+        `uvm_info("DPRAM_SCB", "Resetting global memory reference pool...", UVM_LOW)
     endfunction
 
     function bit address_is_legal(longint unsigned addr);
@@ -47,19 +65,22 @@ class dpram_scoreboard extends uvm_scoreboard;
 
     function bit [`DATA_WIDTH-1:0] get_expected(longint unsigned addr);
         bit [`DATA_WIDTH-1:0] v = '0;
-        if (mem_ref.exists(addr)) v = mem_ref[addr];
+        if (global_mem_pool.exists(addr)) begin
+            v = global_mem_pool.get(addr);
+        end
+        // If address doesn't exist, return default value (zero)
         return v;
     endfunction
 
     virtual function void write_a(dpram_item item);
-      bit [`DATA_WIDTH-1:0] exp;
+        bit [`DATA_WIDTH-1:0] exp;
         `uvm_info("DPRAM_SCB", $sformatf("A: %s", item.convert2string()), UVM_MEDIUM)
         if (is_reset) return;
 
-      if (item.op) begin
+        if (item.op) begin
             if (!address_is_legal(item.addr))
                 `uvm_warning("DPRAM_SCB", $sformatf("Illegal address on A: 0x%0h", item.addr))
-            mem_ref[item.addr] = item.data;
+            global_mem_pool.add(item.addr, item.data);
         end
         else begin
             exp = get_expected(item.addr);
@@ -84,7 +105,7 @@ class dpram_scoreboard extends uvm_scoreboard;
         if (item.op) begin
             if (!address_is_legal(item.addr))
                 `uvm_warning("DPRAM_SCB", $sformatf("Illegal address on B: 0x%0h", item.addr))
-            mem_ref[item.addr] = item.data;
+            global_mem_pool.add(item.addr, item.data);
         end
         else begin
             exp = get_expected(item.addr);
@@ -129,10 +150,10 @@ class dpram_scoreboard extends uvm_scoreboard;
                             (vif_a.op != vif_b.op)) begin
                             // If B writes and A loses arbitration, commit B
                             if (vif_b.op && !vif_a.arbiter_b)
-                                mem_ref[vif_b.addr] = vif_b.wr_data;
+                                global_mem_pool.add(vif_b.addr, vif_b.wr_data);
                             // If A writes and B loses arbitration, commit A
                             else if (vif_a.op && vif_b.arbiter_b)
-                                mem_ref[vif_a.addr] = vif_a.wr_data;
+                                global_mem_pool.add(vif_a.addr, vif_a.wr_data);
                         end
                     end
                 end

@@ -56,3 +56,25 @@ class dpram_vseq extends dpram_vseq_base;
         join
     endtask
 endclass
+
+
+class read_operation_porta_vseq extends dpram_vseq_base;
+    `uvm_object_utils(read_operation_porta_vseq)
+
+    function new(string name="read_operation_porta_vseq");
+        super.new(name);
+    endfunction
+
+    virtual task body();
+        read_operation_porta_seq seq_a;
+
+        seq_a = read_operation_porta_seq::type_id::create("seq_a");
+        seq_a.reg_model = reg_model;
+//       reg_model.print();
+        seq_a.map = reg_model.porta_map;
+//         super.body();
+//         Run read on port A
+        if(!seq_a.randomize()) `uvm_error("RAND","FAILED");
+        seq_a.start(porta_sqr);
+    endtask
+endclass
