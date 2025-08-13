@@ -27,6 +27,8 @@ class dpram_driver extends uvm_driver #(dpram_item);
             @(posedge vif.clk iff vif.ready==1);
                                     item.data = vif.op ? vif.wr_data : vif.rd_data;
             seq_item_port.item_done(item);
+          vif.valid <= 1'b0;// end transaction with valid = 0, stop sending more transaction after its done
+
             fork
                 begin
                     repeat(item.delay) begin

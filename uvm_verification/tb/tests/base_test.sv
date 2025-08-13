@@ -4,6 +4,8 @@ class base_test extends uvm_test;
     dpram_env env;
     virtual port_if vif_a;
     virtual port_if vif_b;
+    int reset_delay;
+    int ral_check = 0;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -13,9 +15,11 @@ class base_test extends uvm_test;
       super.reset_phase(phase);
       phase.raise_objection(this);
       vif_a.rst_n = 1;
-      repeat(1) @(posedge vif_a.clk);
+      //random reset delay instead of static
+      reset_delay = $urandom_range(5, 11);
+        repeat(4) @(posedge vif_a.clk);
       vif_a.rst_n = 0; 
-      repeat(4) @(posedge vif_a.clk);
+      repeat(reset_delay) @(posedge vif_a.clk);
       vif_a.rst_n = 1; 
       repeat(5) @(posedge vif_a.clk);
       phase.drop_objection(this);
@@ -118,3 +122,116 @@ class write_operation_porta_test extends base_test;
     endtask
 
 endclass
+
+class basic_porta_write_portb_read_test extends base_test;
+
+  `uvm_component_utils(basic_porta_write_portb_read_test)
+
+  function new(string name, uvm_component parent);
+      super.new(name, parent);
+  endfunction
+
+  virtual task reset_phase(uvm_phase phase);
+      super.reset_phase(phase);
+  endtask
+
+  virtual task main_phase(uvm_phase phase);
+      basic_porta_write_portb_read_vseq vseq = basic_porta_write_portb_read_vseq::type_id::create("vseq");
+      phase.raise_objection(this);
+      vseq.reg_model = env.reg_blk;
+      vseq.start(env.v_sqr);
+      phase.drop_objection(this);
+  endtask
+
+endclass
+
+class fill_memory_porta_write_portb_read_test extends base_test;
+
+  `uvm_component_utils(fill_memory_porta_write_portb_read_test)
+
+  function new(string name, uvm_component parent);
+      super.new(name, parent);
+  endfunction
+
+  virtual task reset_phase(uvm_phase phase);
+      super.reset_phase(phase);
+  endtask
+
+  virtual task main_phase(uvm_phase phase);
+      fill_memory_porta_write_portb_read_vseq vseq = fill_memory_porta_write_portb_read_vseq::type_id::create("vseq");
+      phase.raise_objection(this);
+      vseq.reg_model = env.reg_blk;
+      vseq.start(env.v_sqr);
+      phase.drop_objection(this);
+  endtask
+
+endclass
+
+class simultaneous_write_different_address_test extends base_test;
+
+  `uvm_component_utils(simultaneous_write_different_address_test)
+
+  function new(string name, uvm_component parent);
+      super.new(name, parent);
+  endfunction
+
+  virtual task reset_phase(uvm_phase phase);
+      super.reset_phase(phase);
+  endtask
+
+  virtual task main_phase(uvm_phase phase);
+      simultaneous_write_different_address_vseq vseq = simultaneous_write_different_address_vseq::type_id::create("vseq");
+      phase.raise_objection(this);
+      vseq.reg_model = env.reg_blk;
+      vseq.start(env.v_sqr);
+      phase.drop_objection(this);
+  endtask
+
+endclass
+
+
+class simultaneous_write_same_address_test extends base_test;
+
+  `uvm_component_utils(simultaneous_write_same_address_test)
+
+  function new(string name, uvm_component parent);
+      super.new(name, parent);
+  endfunction
+
+  virtual task reset_phase(uvm_phase phase);
+      super.reset_phase(phase);
+  endtask
+
+  virtual task main_phase(uvm_phase phase);
+      simultaneous_write_same_address_vseq vseq = simultaneous_write_same_address_vseq::type_id::create("vseq");
+      phase.raise_objection(this);
+      vseq.reg_model = env.reg_blk;
+      vseq.start(env.v_sqr);
+      phase.drop_objection(this);
+  endtask
+
+endclass
+
+
+class simultaneous_write_read_same_address_test extends base_test;
+
+  `uvm_component_utils(simultaneous_write_read_same_address_test)
+
+  function new(string name, uvm_component parent);
+      super.new(name, parent);
+  endfunction
+
+  virtual task reset_phase(uvm_phase phase);
+      super.reset_phase(phase);
+  endtask
+
+  virtual task main_phase(uvm_phase phase);
+      simultaneous_write_read_same_address_vseq vseq = simultaneous_write_read_same_address_vseq::type_id::create("vseq");
+      phase.raise_objection(this);
+      vseq.reg_model = env.reg_blk;
+      vseq.start(env.v_sqr);
+      phase.drop_objection(this);
+  endtask
+
+endclass
+

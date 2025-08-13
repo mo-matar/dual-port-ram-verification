@@ -10,6 +10,7 @@ class dpram_base_seq extends uvm_sequence#(dpram_item);
     uvm_reg_map map;
     dpram_item it;
   dpram_mem_pool_t global_mem_pool;
+  int ral_check = 1;
 
 
     function new(string name="dpram_base_seq");
@@ -44,8 +45,10 @@ class dpram_base_seq extends uvm_sequence#(dpram_item);
       reg_model.mem.read(status, it.addr, read_data, .map(map));
 
       `uvm_info("DPRAM_SEQ", $sformatf("FD Read from addr=%0h, data=%0h", it.addr, read_data), UVM_MEDIUM)
-      if (read_data != write_data) begin
-        `uvm_error(get_type_name(), $sformatf("Read data mismatch at addr=%0h, read_data=%0h, expected_data=%0h", it.addr, read_data, write_data))
+      if(ral_check) begin
+          if (read_data != write_data) begin
+            `uvm_error(get_type_name(), $sformatf("Read data mismatch at addr=%0h, read_data=%0h, expected_data=%0h", it.addr, read_data, write_data))
+          end
       end
     endtask
 
@@ -75,8 +78,10 @@ class dpram_base_seq extends uvm_sequence#(dpram_item);
       reg_model.mem.read(status, it.addr, read_data, .map(map));
 
       `uvm_info("DPRAM_SEQ", $sformatf("FD Read from addr=%0h, data=%0h", it.addr, read_data), UVM_MEDIUM)
-      if (read_data != write_data) begin
-        `uvm_error(get_type_name(), $sformatf("Read data mismatch at addr=%0h, read_data=%0h, expected_data=%0h", it.addr, read_data, write_data))
+      if(ral_check) begin
+          if (read_data != write_data) begin
+            `uvm_error(get_type_name(), $sformatf("Read data mismatch at addr=%0h, read_data=%0h, expected_data=%0h", it.addr, read_data, write_data))
+          end
       end
     endtask
 
@@ -92,8 +97,10 @@ class dpram_base_seq extends uvm_sequence#(dpram_item);
         `uvm_error(get_type_name(), $sformatf("BD Read failed at addr=%0h", it.addr))
       end
       `uvm_info("DPRAM_SEQ", $sformatf("BD Read from addr=%0h, data=%0h", it.addr, read_data), UVM_MEDIUM)
-      if (read_data != write_data) begin
-        `uvm_error(get_type_name(), $sformatf("Read data mismatch at addr=%0h, read_data=%0h, expected_data=%0h", it.addr, read_data, write_data))
+      if(ral_check) begin
+          if (read_data != write_data) begin
+            `uvm_error(get_type_name(), $sformatf("Read data mismatch at addr=%0h, read_data=%0h, expected_data=%0h", it.addr, read_data, write_data))
+          end
       end
     endtask
 
@@ -108,6 +115,49 @@ class dpram_base_seq extends uvm_sequence#(dpram_item);
       `uvm_info("DPRAM_SEQ", $sformatf("FD Writing to addr=%0h, data=%0h", it.addr, it.data), UVM_MEDIUM)
       reg_model.mem.write(status, it.addr, it.data, .map(map));
     endtask
+
+    virtual task fill_mem();
+
+        uvm_status_e status;
+        current_addr = 0;
+
+        repeat(`MEM_DEPTH)begin
+          `uvm_create(it);
+
+        if (!it.randomize() with { it.addr == current_addr; }) begin
+          `uvm_error(get_type_name(), "Randomize write item failed")
+          return;
+        end
+        current_addr++;
+        `uvm_info("DPRAM_SEQ", $sformatf("FD Writing to addr=%0h, data=%0h", it.addr, it.data), UVM_MEDIUM)
+        reg_model.mem.write(status, it.addr, it.data, .map(map));
+
+        end
+
+      
+    endtask
+
+  virtual task read_all_mem();
+
+    uvm_status_e status;
+    current_addr = 0;
+
+    repeat(`MEM_DEPTH) begin
+      `uvm_create(it);
+      if (!it.randomize() with { it.addr == current_addr; }) begin
+        `uvm_error(get_type_name(), "Randomize read item failed")
+        return;
+      end
+      `uvm_info("DPRAM_SEQ", $sformatf("FD Reading from addr=%0h", it.addr), UVM_MEDIUM)
+      reg_model.mem.read(status, it.addr, read_data, .map(map));
+
+      `uvm_info("DPRAM_SEQ", $sformatf("FD Read from addr=%0h, data=%0h", it.addr, read_data), UVM_MEDIUM)
+      // if (read_data != write_data) begin
+      //   `uvm_error(get_type_name(), $sformatf("Read data mismatch at addr=%0h, read_data=%0h, expected_data=%0h", it.addr, read_data, write_data))
+      // end
+      current_addr++;
+    end
+  endtask
 
 endclass
 class dpram_wr_rd_seq extends dpram_base_seq;
@@ -160,4 +210,108 @@ class write_operation_porta_seq extends dpram_base_seq;
         backdoor_read(it);
       end
     endtask
-    endclass
+endclass
+
+
+
+class basic_write_seq extends dpram_base_seq;
+    `uvm_object_utils(basic_write_seq)
+    function new(string name="basic_write_seq");
+        super.new(name);
+    endfunction
+
+    virtual task body();
+      super.body();
+      `uvm_create(it);
+      frontdoor_write(it);
+    endtask
+endclass
+
+
+class basic_read_seq extends dpram_base_seq;
+    `uvm_object_utils(basic_read_seq)
+    function new(string name="basic_read_seq");
+        super.new(name);
+    endfunction
+
+    virtual task body();
+      super.body();
+      `uvm_create(it);
+      frontdoor_read(it);
+    endtask
+
+endclass
+
+
+class fill_mem_seq extends dpram_base_seq;
+    `uvm_object_utils(fill_mem_seq)
+    function new(string name="fill_mem_seq");
+        super.new(name);
+    endfunction
+
+    virtual task body();
+      super.body();
+
+        
+        fill_mem();
+      
+    endtask
+endclass
+
+
+class read_all_mem_seq extends dpram_base_seq;
+    `uvm_object_utils(read_all_mem_seq)
+    function new(string name="read_all_mem_seq");
+        super.new(name);
+    endfunction
+
+    virtual task body();
+      super.body();
+
+    
+      read_all_mem();
+    endtask
+endclass
+
+class single_wr_rd_seq extends dpram_base_seq;
+    `uvm_object_utils(single_wr_rd_seq)
+    function new(string name="single_wr_rd_seq");
+        super.new(name);
+    endfunction
+
+    virtual task body();
+      super.body();
+      dpram_adapter::delay = 0;
+
+        `uvm_create(it);
+        frontdoor_write(it);
+        frontdoor_read(it);
+    endtask
+
+    virtual task frontdoor_write(ref dpram_item it);
+      uvm_status_e status;
+      if (!it.randomize() with { it.addr == current_addr; }) begin
+        `uvm_error(get_type_name(), "Randomize write item failed")
+        return;
+      end
+      current_addr = it.addr;
+      write_data = it.data;
+      `uvm_info("DPRAM_SEQ", $sformatf("FD Writing to addr=%0h, data=%0h", it.addr, it.data), UVM_MEDIUM)
+      reg_model.mem.write(status, it.addr, it.data, .map(map));
+    endtask
+
+    virtual task frontdoor_read(ref dpram_item it);
+      uvm_status_e status;
+      if (!it.randomize() with {it.addr == current_addr; }) begin
+        `uvm_error(get_type_name(), "Randomize read item failed")
+        return;
+      end
+      `uvm_info("DPRAM_SEQ", $sformatf("FD Reading from addr=%0h", it.addr), UVM_MEDIUM)
+      reg_model.mem.read(status, it.addr, read_data, .map(map));
+
+      `uvm_info("DPRAM_SEQ", $sformatf("FD Read from addr=%0h, data=%0h", it.addr, read_data), UVM_MEDIUM)
+    endtask
+
+
+    
+endclass
