@@ -5,6 +5,9 @@
 module tb_dual_port_ram;
   bit clk;
   bit rst_n; 
+  uvm_cmdline_processor clp;
+  int NoTrans;
+  string NoTrans_str;
 
   
   port_if port_a_if(clk);
@@ -37,22 +40,23 @@ module tb_dual_port_ram;
     forever #5 clk = ~clk;
   end
   
-//   task system_reset;
-//             repeat(5) @(posedge clk);
-
-//     rst_n = 1;
-//     repeat(1) @(posedge clk);
-//     rst_n = 0; 
-//     repeat(5) @(posedge clk);
-//     rst_n = 1; 
-//         repeat(5) @(posedge clk);
-
-//   endtask
   
   initial begin
+    clp = uvm_cmdline_processor::get_inst();
+    if (clp.get_arg_value("+NoTrans=", NoTrans_str)) 
+      if ($sscanf(NoTrans_str, "%d", NoTrans))
+        
+      NoTrans = NoTrans ? NoTrans : 10;
+
+    
+        
+        $display("wow it worked, %d", NoTrans);
+ 
     uvm_config_db#(virtual port_if)::set(null, "uvm_test_top", "port_a_if", port_a_if);
     uvm_config_db#(virtual port_if)::set(null, "uvm_test_top", "port_b_if", port_b_if);
-    run_test("read_operation_porta_test");
+    uvm_config_db#(int)::set(null, "uvm_test_top", "NoTrans", NoTrans);
+
+    run_test();
   end
   
   initial begin 

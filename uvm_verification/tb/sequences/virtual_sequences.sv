@@ -78,3 +78,24 @@ class read_operation_porta_vseq extends dpram_vseq_base;
         seq_a.start(porta_sqr);
     endtask
 endclass
+
+class write_operation_porta_vseq extends dpram_vseq_base;
+    `uvm_object_utils(write_operation_porta_vseq)
+
+    function new(string name="write_operation_porta_vseq");
+        super.new(name);
+    endfunction
+
+    virtual task body();
+        write_operation_porta_seq seq_a;
+
+        seq_a = write_operation_porta_seq::type_id::create("seq_a");
+        seq_a.reg_model = reg_model;
+        seq_a.map = reg_model.porta_map;
+
+        if(!seq_a.randomize()) `uvm_error("RAND","FAILED");
+        seq_a.start(porta_sqr);
+        
+
+    endtask
+endclass
