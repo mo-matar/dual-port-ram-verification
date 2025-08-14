@@ -8,7 +8,7 @@ interface port_if (input bit clk);
     logic ready;
     bit arbiter_b;
 
-    always_ff @(posedge clk) begin
+  always_ff @(posedge clk) begin
         arbiter_b <= ~arbiter_b;
     end
 

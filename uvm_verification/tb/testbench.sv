@@ -8,8 +8,8 @@ module tb_dual_port_ram;
   uvm_cmdline_processor clp;
   int NoTrans;
   string NoTrans_str;
-  string portA_write_portB_read_str;
-  int portA_write_portB_read;
+  string portA_portB_alternate_op_str;
+  int portA_portB_alternate_op;
 
   
   port_if port_a_if(clk);
@@ -50,10 +50,10 @@ module tb_dual_port_ram;
       
       NoTrans = NoTrans ? NoTrans : 10;
     
-    if (clp.get_arg_value("+portA_write_portB_read=", portA_write_portB_read_str))
-      if ($sscanf(portA_write_portB_read_str, "%d", portA_write_portB_read))
+    if (clp.get_arg_value("+portA_portB_alternate_op=", portA_portB_alternate_op_str))
+      if ($sscanf(portA_portB_alternate_op_str, "%d", portA_portB_alternate_op))
 
-      portA_write_portB_read = (portA_write_portB_read != 0) ? 1 : 0;
+      portA_portB_alternate_op = (portA_portB_alternate_op != 0) ? 1 : 0;
 
     
 
@@ -64,7 +64,7 @@ module tb_dual_port_ram;
     uvm_config_db#(virtual port_if)::set(null, "uvm_test_top", "port_a_if", port_a_if);
     uvm_config_db#(virtual port_if)::set(null, "uvm_test_top", "port_b_if", port_b_if);
     uvm_config_db#(int)::set(null, "uvm_test_top", "NoTrans", NoTrans);
-    uvm_config_db#(int)::set(null, "uvm_test_top", "portA_write_portB_read", portA_write_portB_read);
+    uvm_config_db#(int)::set(null, "uvm_test_top", "portA_portB_alternate_op", portA_portB_alternate_op);
 
     run_test();
   end

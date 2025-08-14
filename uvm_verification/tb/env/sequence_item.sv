@@ -8,8 +8,8 @@ class dpram_item extends uvm_sequence_item;
 
     constraint dpram_constraint {
         delay == 0;
-        // delay <= 10;
-        addr inside {[0:`MEM_DEPTH-1]};
+       // delay <= 10;
+        soft addr inside {[0:`MEM_DEPTH-1]};
     }
 
 

@@ -8,6 +8,7 @@ package tb_pkg;
     `include "uvm_macros.svh"
     
     `include "sequence_item.sv"
+    `include "config.sv"
     `include "driver.sv"
     `include "monitor.sv"
     `include "agent.sv"

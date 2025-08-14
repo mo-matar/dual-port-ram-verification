@@ -1,103 +1,79 @@
-test case,description,name,Completed,Passed,run flags
-,,,FALSE,____,
+test case,description,name,SV Completed,UVM Completed,SV Status,UVM Status,SV run flags,UVM run flags
+Write operation test,"Goal: verify that write operation works independently of read
+send a frontdoor write transaction to a port
+read the data with backdoor access
+check read data is equal to written data",write_operation_single_port_test,TRUE,TRUE,N/A,PASS,,"+NoTrans=20 +UVM_TESTNAME=write_operation_single_port_test +portA_portB_alternate_op=1 +UVM_NO_RELNOTES +acc=rw
+
++NoTrans=20 +UVM_TESTNAME=write_operation_single_port_test +portA_portB_alternate_op=0 +UVM_NO_RELNOTES +acc=rw"
+Read operation test,"Goal: verify that read operation works independently of write
+write random data with backdoor access to random memory address
+send read transaction to the same address
+check read data is equal to memory data",read_operation_single_port_test,TRUE,TRUE,N/A,PASS,,"+NoTrans=20 +UVM_TESTNAME=read_operation_single_port_test +portA_portB_alternate_op=1 +UVM_NO_RELNOTES +acc=rw
+
++NoTrans=20 +UVM_TESTNAME=read_operation_single_port_test +portA_portB_alternate_op=0 +UVM_NO_RELNOTES +acc=rw"
 single port write/read operation ( port A),"Goal: verify basic write and read operations on  port A
 write random data and address
 read from the same address
-verify that read data equals previously written data",basic_write_read_porta,TRUE,PASS, +TEST=basic_write_read_porta +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+verify that read data equals previously written data",basic_write_read_porta,TRUE,TRUE,PASS,PASS, +TEST=basic_write_read_porta +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans=20 +UVM_TESTNAME=basic_write_read_single_port_test +portA_portB_alternate_op=1 +UVM_NO_RELNOTES +acc=rw
 singe port write/read operation (port B) ,"Goal:  verify basic write and read operations on port B
 write random data and address
 read from the same address
-verify that read data equals previously written data",basic_write_read_portb,TRUE,PASS, +TEST=basic_write_read_portb +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+verify that read data equals previously written data",basic_write_read_portb,TRUE,TRUE,PASS,PASS, +TEST=basic_write_read_portb +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans=20 +UVM_TESTNAME=basic_write_read_single_port_test +portA_portB_alternate_op=0 +UVM_NO_RELNOTES +acc=rw
+write_read_both_ports,"Goal: verify basic write and read operations on both ports
+write random data and addresses
+read from the same address
+verify that read data equals previously written data",basic_write_read_both_ports,TRUE,TRUE,PASS,PASS, +TEST=default +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans=20 +UVM_TESTNAME=dpram_test +portA_portB_alternate_op=0 +UVM_NO_RELNOTES +acc=rw
 basic write/read different ports,"Goal: ensure memory consistency across ports
 select  port A for writing and port B for reading
 write random data and random address on  port A
 read data at the same address on port B
 check if data written from  port A is the same as the data read from port B
-",basic_porta_write_portb_read,TRUE,PASS, +TEST=basic_porta_write_portb_read +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+",basic_porta_write_portb_read,TRUE,TRUE,PASS,PASS, +TEST=basic_porta_write_portb_read +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans=10 +UVM_TESTNAME=basic_porta_write_portb_read_test +portA_write_portB_read=1  +UVM_NO_RELNOTES +acc=rw
 "fill memory with  port A, read entire memory with port B","Goal: test ability of  port A to fill memory and port B to read all memory
 Write to all memory locations through Port A
 Read all memory locations through port B
-check if written data is equal to read data",fill_memory_porta_write_portb_read,TRUE,PASS, +TEST=fill_memory_porta_write_portb_read +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+check if written data is equal to read data",fill_memory_porta_write_portb_read,TRUE,TRUE,PASS,PASS, +TEST=fill_memory_porta_write_portb_read +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans= +UVM_TESTNAME=fill_memory_porta_write_portb_read_test +portA_write_portB_read=1  +UVM_NO_RELNOTES +acc=rw
 simultaneous read from different addresses,"Goal: test ability of memory to handle reads from both ports simultaneously
 read address from  port A
 read different address from port B at same cycle
-verify the read data is consistent and have not changed",simultaneous_read_different_address,TRUE,PASS, +TEST=simultaneous_read_different_address +NoOfTran=500 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+verify the read data is consistent and have not changed",simultaneous_read_different_address,TRUE,TRUE,PASS,PASS, +TEST=simultaneous_read_different_address +NoOfTran=500 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans= +UVM_TESTNAME=simultaneous_read_different_address +portA_write_portB_read=1  +UVM_NO_RELNOTES +acc=rw
 simultaneous write to differnt addreses,"Goal: test ability of memory to handle writes from both ports simultaneously
 write to random address from  port A
 write to different address from port B at same cycle
-read data written and verify that it's consistent ",simultaneous_write_different_address,TRUE,PASS, +TEST=simultaneous_write_different_address +NoOfTran=500 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+read data written and verify that it's consistent ",simultaneous_write_different_address,TRUE,TRUE,PASS,PASS, +TEST=simultaneous_write_different_address +NoOfTran=500 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans=20 +UVM_TESTNAME=simultaneous_write_different_address_test +portA_write_portB_read=1 +UVM_NO_RELNOTES +acc=rw
 simultaneous write to the same address,"Goal: check the behaviour of memory with collisions
 write to address , random data on  port A
 write to same address , random data , on port B at same cycle
-Read same address verify arbitration logic",simultaneous_write_same_address,TRUE,PASS, +TEST=simultaneous_write_same_address +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+Read same address verify arbitration logic",simultaneous_write_same_address,TRUE,TRUE,PASS,PASS, +TEST=simultaneous_write_same_address +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans=20 +UVM_TESTNAME=simultaneous_write_same_address_test +portA_write_portB_read=1 +UVM_NO_RELNOTES +acc=rw
 simultaneous write and read to the same address,"Goal: ensure consistency accessing data with different modes of operation
 fill memory with one port
 write with a port and read with a different port at the same address
-ensure that the new value has been read not the old value",simultaneous_write_read_same_address,TRUE,PASS," +TEST=simultaneous_write_read_same_address +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+ensure that the new value has been read not the old value",simultaneous_write_read_same_address,TRUE,TRUE,PASS,PASS," +TEST=simultaneous_write_read_same_address +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
 
- +TEST=simultaneous_write_read_same_address +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=1 -l out.log"
+ +TEST=simultaneous_write_read_same_address +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=1 -l out.log",+NoTrans=20 +UVM_TESTNAME=simultaneous_write_same_address_test +portA_write_portB_read=1 +UVM_NO_RELNOTES +acc=rw
 out of range memory access ,"Goal: check for out of range access handling
 write on illegal addresses
 try reading all memory
-verify that memory was not affected",out_of_range_memory_access,TRUE,PASS, +TEST=out_of_range_memory_access +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+verify that memory was not affected",out_of_range_memory_access,TRUE,TRUE,PASS,PASS, +TEST=out_of_range_memory_access +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans= +UVM_TESTNAME=out_of_range_memory_access  +portA_write_portB_read=1 +UVM_NO_RELNOTES +acc=rw
 reset test,"Goal: write random data and random address
 apply reset
 read same address
-should read default 0 value from memory",reset_test,TRUE,PASS, +TEST=reset_test +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+should read default 0 value from memory",reset_test,TRUE,FALSE,CANCELED,CALNCELED, +TEST=reset_test +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,
 back to back transactions on  port A,"Goal: test handling of continous writing and reading on memory from  port A 
 write random data with random address from port A continously
-verify correct data ",B2B_transactions_porta,TRUE,PASS, +TEST=B2B_transactions_porta +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+verify correct data ",B2B_transactions_porta,TRUE,TRUE,PASS,PASS, +TEST=B2B_transactions_porta +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans=20 +UVM_TESTNAME=B2B_transactions_single_port_test +portA_portB_alternate_op=1 +UVM_NO_RELNOTES +acc=rw
 back to back transactions on port B,"Goal: test handling of continous writing and reading on memory from port B
 write random data with random address from port B continously
-verify correct data and arbitration",B2B_transactions_portb,TRUE,PASS, +TEST=B2B_transactions_portb +NoOfTran=20 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+verify correct data and arbitration",B2B_transactions_portb,TRUE,TRUE,PASS,PASS, +TEST=B2B_transactions_portb +NoOfTran=20 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans=20 +UVM_TESTNAME=B2B_transactions_single_port_test +portA_portB_alternate_op=0 +UVM_NO_RELNOTES +acc=rw
 back to back transactions on both ports ,"Goal: test continuous transactions on memory from both ports
 random read or write
 put random data on memory with random addresses
 check if reference model has the same data as the memory
-",B2B_transactions_both_ports,TRUE,PASS, +TEST=B2B_transactions_both_ports +NoOfTran=500 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+",B2B_transactions_both_ports,TRUE,TRUE,PASS,PASS, +TEST=B2B_transactions_both_ports +NoOfTran=500 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans= +UVM_TESTNAME=B2B_transactions_both_ports +portA_write_portB_read=1  +UVM_NO_RELNOTES +acc=rw
 default value test,"Goal: verify default value of memory
 read random addresses from memory
-ensure data read is 0",default_mem_value,TRUE,PASS, +TEST=default_mem_value +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
+ensure data read is 0",default_mem_value,TRUE,TRUE,PASS,PASS, +TEST=default_mem_value +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,+NoTrans=20 +UVM_TESTNAME=default_mem_value_test +portA_write_portB_read=1 +UVM_NO_RELNOTES +acc=rw
 write during reset,"Goal: verify correct operation when writing while reset
 hold reset for some time
 write while reset is being held
-verify that writes do not affect memory",write_during_reset,TRUE,FAIL, +TEST=write_during_reset +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log
-"fill memory with port B, read entire memory with  port A","Goal: test ability of port B to fill memory and  port A to read all memory
-Write to all memory locations through port B
-Read all memory locations through Port a
-check if written data is equal to read data",fill_memory_portb_write_porta_read,FALSE,____,
-"fill memory with  port A, read entire memory with  port A","Goal: test ability of port B to fill memory and  port A to read all memory
-Write to all memory locations through Port a
-Read all memory locations through Port a
-check if written data is equal to read data",fill_memory_porta_write_porta_read,FALSE,____,
-"fill memory with port B, read entire memory with port B","Goal: test ability of port B to fill memory and  port A to read all memory
-Write to all memory locations through port B
-Read all memory locations through port B
-check if written data is equal to read data",fill_memory_portb_write_portb_read,FALSE,____,
-back to back reads on  port A,"Goal: test handling of continously reading memory from  port A
-read random address from  port A continously
-verify correct data and arbitration",B2B_reads_porta,FALSE,____,
-back to back reads on port B,"Goal: test handling of continously reading memory from port B
-read random address from port B continously
-verify correct data and arbitration",B2B_reads_portb,FALSE,____,
-back to back transactions on both ports ,"put random data writes on memory with random addresses on  port A and port B
-random write or read operation
-include a chance of collision",,FALSE,____,
-minimum cycle reads,"test the minimal delay scenario
-select random port
-initiate write operation
-apply data
-wait for one cycle
-read data
-should be able to handle one cycle delays with the data written equal to the read",,FALSE,____,
-large cycle delays,"test the large delay scenario
-select random port
-initiate write operation
-apply data
-wait for large delay
-read data
-should be able to handle large cycle delays with the data written equal to the read",,FALSE,____,
-fill entire memory,"Goal: test the ability of the memory to access all addresses
-write random data on all addresses: minimum address up to max
-read from the minimum addresses up to max,
-check written data is equal to ones read",fill_memory,FALSE,____,
+verify that writes do not affect memory",write_during_reset,TRUE,FALSE,N/A,CALNCELED, +TEST=write_during_reset +NoOfTran=100 +DisableDisplay=1 +portA_fill_portB_read=0 -l out.log,
